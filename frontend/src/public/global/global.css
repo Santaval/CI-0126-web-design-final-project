@@ -8,6 +8,12 @@
     --font-size-small: 14px;
     --font-size-medium: 18px;
     --font-size-large: 24px;
+    --font-size-xlarge: 32px;
+    --font-size-xxlarge: 40px;
+    --font-size-xxxlarge: 48px;
+    --font-size-huge: 64px;
+    --font-size-giant: 80px;
+    --font-size-massive: 96px;
 
     --spacing-small: 8px;
     --spacing-medium: 16px;
@@ -30,7 +36,7 @@ body {
     padding: 0;
     background-color: var(--color-background);
     color: var(--color-primary);
-    font-family: Arial, sans-serif;
+     font-family: "Montserrat", sans-serif;
 }
 
 a {
@@ -97,4 +103,10 @@ a {
     display: flex;
     align-items: center;
     gap: var(--spacing-medium);
+}
+
+
+/* UTILITY CLASSES */
+.white-text {
+    color: var(--color-text);
 }
