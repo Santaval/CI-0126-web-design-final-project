@@ -12,6 +12,32 @@ export default class AuthService {
   }
 
   /**
+   * Logs in the user by saving their data to localStorage.
+   * @param {Object} user - The user data to save.
+   */
+  static async login(user) {
+    
+    try {
+    const mockUsers = [
+      { username: 'testuser', password: 'password123' },
+      { username: 'johndoe', password: 'qwerty' },
+    ];
+    
+    const foundUser = mockUsers.find(
+      u => u.username === user.username && u.password === user.password
+    );
+
+      if (foundUser !== undefined) {
+        localStorage.setItem('user', JSON.stringify(foundUser));
+      } else {
+        throw new Error('User not registered');
+      }
+    } catch(e) {
+      throw new Error(e.message);
+    }
+  }
+
+  /**
    * Retrieves the user data from localStorage.
    * @returns {Object|null} The user data or null if not found.
    */
