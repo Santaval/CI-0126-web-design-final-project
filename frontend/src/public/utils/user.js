@@ -1,5 +1,9 @@
 export default class AuthService {
-  static async saveUser(user) {
+  /**
+   * Saves the user data to localStorage.
+   * @param {Object} user - The user data to save.
+   */
+  static async register(user) {
     try {
       localStorage.setItem('user', JSON.stringify(user));
     } catch {
@@ -7,6 +11,10 @@ export default class AuthService {
     }
   }
 
+  /**
+   * Retrieves the user data from localStorage.
+   * @returns {Object|null} The user data or null if not found.
+   */
   static async getUser() {
     try {
       const userData = localStorage.getItem('user');
@@ -16,7 +24,10 @@ export default class AuthService {
     }
   }
 
-  static async clearUser() {
+  /**
+   * Clears the user data from localStorage.
+   */
+  static async logout() {
     try {
       localStorage.removeItem('user');
     } catch {

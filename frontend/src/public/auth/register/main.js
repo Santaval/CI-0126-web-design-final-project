@@ -20,7 +20,7 @@ async function handleSubmit(event) {
 
 async function registerUser(data) {
     try {
-        await AuthService.saveUser(data);
+        await AuthService.register(data);
         window.location.href = '/';
     } catch (error) {
         console.error('Error registering user:', error);
