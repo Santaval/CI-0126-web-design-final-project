@@ -1,5 +1,100 @@
 :root {
     --color-primary: #FFD60A;
+    --color-primary-dark: #CCA300;
     --color-secondary: #003566;
     --color-background: #000D20;
+    --color-text: #FFFFFF;
+
+    --font-size-small: 14px;
+    --font-size-medium: 18px;
+    --font-size-large: 24px;
+
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+
+    --size-small: 32px;
+    --size-medium: 48px;
+    --size-large: 64px;
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    font-family: Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color:  var(--color-text);
+}
+
+
+
+/* BUTTON STYLES */
+.primary-button {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border: none;
+    padding: var(--spacing-small) var(--spacing-medium);
+    font-size: var(--font-size-small);
+    cursor: pointer;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.primary-button:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    padding: var(--spacing-small) var(--spacing-medium);
+    font-size: var(--font-size-small);
+    cursor: pointer;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.secondary-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+}
+
+
+/* TOP NAVIGATION BAR */
+#top-nav {
+    padding: var(--spacing-small) var(--spacing-medium);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#top-nav ul {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-medium)  ;
+}
+
+#top-nav ul li {
+    cursor: pointer;
+    font-size: var(--font-size-small);
+}
+
+#top-nav div {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-medium);
 }
