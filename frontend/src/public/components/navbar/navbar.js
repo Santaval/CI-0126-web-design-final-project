@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const targets = document.querySelectorAll('[data-include="navbar"]');
   if (!targets.length) return;
 
-  fetch('/global/navbar.html')
+  fetch('/components/navbar/navbar.html')
     .then(res => {
       if (!res.ok) throw new Error('Navbar not found');
       return res.text();
