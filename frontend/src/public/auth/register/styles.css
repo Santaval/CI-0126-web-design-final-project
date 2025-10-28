@@ -1,0 +1,15 @@
+.auth-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 95vh;  
+    background-image: url("/img/bg.png"); 
+    background-size: cover;
+}
+
+.auth-section h2 {
+    font-size:var(--font-size-large);
+    margin-bottom: var(--spacing-large);
+    color: var(--color-text);
+}
