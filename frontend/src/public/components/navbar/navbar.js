@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
 async function updateNavForTargets(targets) {
   const user = await AuthService.getUser();
   targets.forEach(t => {
@@ -40,7 +39,6 @@ async function updateNavForTargets(targets) {
     if (user) {
       right.innerHTML = `
         <a class="secondary-button" href="/auth/profile">Profile</a>
-        <a class="primary-button" href="/auth/logout">Logout</a>
       `;
     } else {
       right.innerHTML = `
