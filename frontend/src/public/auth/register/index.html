@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/global/global.css" />
     <link rel="stylesheet" href="/auth/register/styles.css" />
     <title>Register</title>
-    <script src="/components/navbar/navbar.js" defer></script>
+    <script type="module" src="/components/navbar/navbar.js" defer></script>
   </head>
   <body>
     <div data-include="navbar"></div>
@@ -15,7 +15,7 @@
       <section class="auth-section">
         <h2 class="white-text">Register</h2>
         <!-- registration form goes here -->
-        <form action="" class="primary-form">
+        <form id="register-form" class="primary-form" >
           <div class="form-group">
             <input
               type="text"
@@ -47,5 +47,7 @@
         </form>
       </section>
     </main>
+
+    <script type="module" src="/auth/register/main.js"></script>
   </body>
 </html>
