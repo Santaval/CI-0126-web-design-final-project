@@ -1,0 +1,15 @@
+#hero-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;   
+}
+
+#hero-section h1 {
+    font-size: var(--font-size-huge);
+    margin-bottom: var(--spacing-medium);
+    text-align: center;
+}
+
+
