@@ -14,19 +14,8 @@
     <title>Document</title>
   </head>
   <body>
-    <!-- TOP NAVIGATION BAR -->
-    <nav id="top-nav">
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/game">Gameplay</a></li>
-        <li><a href="/contact">Privacidad</a></li>
-      </ul>
-
-      <div>
-        <a class="secondary-button" href="/register">Register</a>
-        <a class="primary-button" href="/login">Login</a>
-      </div>
-    </nav>
+    <!-- TOP NAVIGATION BAR (loaded from partial) -->
+    <div data-include="navbar"></div>
     <!-- TOP NAVIGATION END -->
 
     <main>
@@ -38,5 +27,6 @@
         <a class="primary-button" href="/game">Play Now</a>
       </section>
     </main>
+    <script src="/global/navbar.js" defer></script>
   </body>
 </html>
