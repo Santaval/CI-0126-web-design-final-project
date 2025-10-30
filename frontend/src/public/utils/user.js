@@ -6,6 +6,13 @@ export default class AuthService {
   static async register(user) {
     try {
       localStorage.setItem('user', JSON.stringify(user));
+
+      // push to local storage users database
+      const usersData = localStorage.getItem('users');
+      let users = usersData ? JSON.parse(usersData) : [];
+      users.push(user);
+      localStorage.setItem('users', JSON.stringify(users));
+
     } catch {
       console.warn('Could not save user to localStorage');
     }
@@ -18,10 +25,8 @@ export default class AuthService {
   static async login(user) {
     
     try {
-    const mockUsers = [
-      { username: 'testuser', password: 'password123' },
-      { username: 'johndoe', password: 'qwerty' },
-    ];
+    const usersData = localStorage.getItem('users');
+    const mockUsers = usersData ? JSON.parse(usersData) : [];
     
     const foundUser = mockUsers.find(
       u => u.username === user.username && u.password === user.password

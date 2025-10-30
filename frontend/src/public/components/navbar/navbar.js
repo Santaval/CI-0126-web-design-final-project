@@ -38,7 +38,7 @@ async function updateNavForTargets(targets) {
     if (!right) return;
     if (user) {
       right.innerHTML = `
-        <a class="secondary-button" href="/auth/profile">Profile</a>
+        <a class="secondary-button" href="/profile">Profile</a>
       `;
     } else {
       right.innerHTML = `

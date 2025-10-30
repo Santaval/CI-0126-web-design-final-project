@@ -1,3 +1,5 @@
+import AuthService from "/utils/user";
+
 const $ = (selector) => document.querySelector(selector);
 
 const form = $('#profile-form');
@@ -48,15 +50,12 @@ profileImageInput.addEventListener('change', updatePreviewImage);
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Fetch existing profile data from server (mocked here)
-    const existingProfile = {
-      username: 'JohnDoe',
-      profileImageUrl: 'https://via.placeholder.com/150'
-    };
+    const user = AuthService.getUser();
 
     // Populate form fields with existing data
-    usernameInput.value = existingProfile.username;
+    usernameInput.value = user.username;
     const previewImage = $('#profile-preview');
-    previewImage.src = existingProfile.profileImageUrl;
+    previewImage.src = user.profileImageUrl;
     previewImage.style.display = 'block';
 
   } catch (error) {
