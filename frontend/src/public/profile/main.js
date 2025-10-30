@@ -1,10 +1,12 @@
-import AuthService from "/utils/user";
+import AuthService from "/utils/user.js";
 
+document.addEventListener('DOMContentLoaded', async () => {
 const $ = (selector) => document.querySelector(selector);
 
 const form = $('#profile-form');
 const profileImageInput = $('#profile-input');
 const usernameInput = $('#username');
+const logoutButton = $('#logout-button');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -16,10 +18,17 @@ form.addEventListener('submit', async (e) => {
   }
 
   try {
-    // log data for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+    const user = await AuthService.getUser();
+    const updatedData = {
+      id: user.id,
+      username: formData.get('username'),
+      profileImageUrl: formData.get('profileImage')
+        ? URL.createObjectURL(formData.get('profileImage'))
+        : user.profileImageUrl,
+    };
+
+    await AuthService.updateUser(updatedData);
+    // window.location.href = '/profile';
 
   } catch (error) {
     console.error('Error submitting profile form:', error);
@@ -47,11 +56,9 @@ profileImageInput.addEventListener('change', updatePreviewImage);
 
 
 // Load existing profile data
-document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Fetch existing profile data from server (mocked here)
-    const user = AuthService.getUser();
-
+    const user = await AuthService.getUser();
     // Populate form fields with existing data
     usernameInput.value = user.username;
     const previewImage = $('#profile-preview');
@@ -61,4 +68,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.error('Error loading profile data:', error);
   }
+
+  console.log(logoutButton  );
+  logoutButton.addEventListener('click', async () => {
+    try {
+      await AuthService.logout();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  });
 });
