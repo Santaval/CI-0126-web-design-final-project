@@ -5,7 +5,19 @@ export default class AuthService {
    */
   static async register(user) {
     try {
-      localStorage.setItem('user', JSON.stringify(user));
+      const uData = {
+        ...user,
+        id: Date.now().toString(),
+      }
+
+      localStorage.setItem('user', JSON.stringify(uData));
+
+      // push to local storage users database
+      const usersData = localStorage.getItem('users');
+      let users = usersData ? JSON.parse(usersData) : [];
+      users.push(uData);
+      localStorage.setItem('users', JSON.stringify(users));
+
     } catch {
       console.warn('Could not save user to localStorage');
     }
@@ -18,10 +30,8 @@ export default class AuthService {
   static async login(user) {
     
     try {
-    const mockUsers = [
-      { username: 'testuser', password: 'password123' },
-      { username: 'johndoe', password: 'qwerty' },
-    ];
+    const usersData = localStorage.getItem('users');
+    const mockUsers = usersData ? JSON.parse(usersData) : [];
     
     const foundUser = mockUsers.find(
       u => u.username === user.username && u.password === user.password
@@ -58,6 +68,27 @@ export default class AuthService {
       localStorage.removeItem('user');
     } catch {
       console.warn('Could not save user to localStorage');
+    }
+  }
+
+  static async updateUser(updatedData) {
+    try {
+      console.log('Updating user with data:', updatedData);
+      const userData = localStorage.getItem('user');
+      if (!userData) throw new Error('No user logged in');
+
+      const user = JSON.parse(userData);
+      const updatedUser = { ...user, ...updatedData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Also update in users database
+      const usersData = localStorage.getItem('users');
+      let users = usersData ? JSON.parse(usersData) : [];
+      users = users.map(u => u.id === updatedData.id ? updatedUser : u);
+      localStorage.setItem('users', JSON.stringify(users));
+
+    } catch (error) {
+      throw new Error('Could not update user: ' + error.message);
     }
   }
 }

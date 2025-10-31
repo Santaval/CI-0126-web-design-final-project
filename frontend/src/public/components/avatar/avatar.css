@@ -1,0 +1,8 @@
+.avatar-container {
+    background-color: var(--color-primary);
+    padding: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+

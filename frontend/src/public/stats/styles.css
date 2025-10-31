@@ -1,0 +1,117 @@
+main {
+  padding: var(--spacing-large);
+}
+
+#stats-section header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+}
+
+#stats-container {
+  margin-top: var(--spacing-xxlarge);
+  display: flex;
+  gap: var(--spacing-large);
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+}
+
+.stat-card p {
+  font-size: var(--font-size-xxlarge);
+  font: bold;
+}
+
+.stat-card h2 {
+  color: var(--color-text);
+  font-size: var(--font-size-small);
+}
+
+#previous-matches-section {
+  margin-top: 4em;
+}
+
+#matches-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-large);
+}
+
+.match-card {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  padding: var(--spacing-large) var(--spacing-xxlarge);
+  margin-bottom: var(--spacing-medium);
+  gap: 48px;
+  min-width: 400px;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+  min-width: 180px;
+  min-height: 80px;
+  border-radius: 20px;
+  background: transparent;
+  border: none;
+  padding: 0 12px;
+  position: relative;
+}
+
+.player.winner {
+  border: 2px solid var(--color-primary);
+  background: rgba(255, 214, 10, 0.08);
+}
+
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-right: 8px;
+}
+.avatar-circle img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.player-name {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: var(--font-size-medium);
+}
+.player-label {
+  color: var(--color-primary);
+  font-size: var(--font-size-small);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.vs-label {
+  color: var(--color-text);
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  margin: 0 24px;
+  letter-spacing: 2px;
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/global/global.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/profile/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Profile</title>
+  </head>
+  <body>
+    <!-- TOP NAVIGATION BAR (loaded from partial) -->
+    <div data-include="navbar"></div>
+    <!-- TOP NAVIGATION END -->
+
+    <main>
+      <section id="profile-section">
+        <form action="" class="primary-form" id="profile-form" enctype="multipart/form-data">
+          <div class="profile-container">
+            <input type="file" id="profile-input" accept="image/*" />
+            <label for="profile-input" class="profile-label">
+              <img id="profile-preview" src="/img/default-profile.png" alt="Profile" />
+              <span class="icon"><img src="/img/edit.png" width="20" alt=""></span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Username"
+              required
+            />
+          </div>
+
+            <button type="submit" class="primary-button">Update Profile</button>
+
+        </form>
+
+        <button id="logout-button" type="button" class="secondary-button">Logout</button>
+      </section>
+    </main>
+    <script type="module" src="/components/navbar/navbar.js" defer></script>
+    <script type="module" src="/profile/main.js" defer></script>
+  </body>
+</html>

@@ -20,7 +20,10 @@ async function handleSubmit(event) {
 
 async function registerUser(data) {
     try {
-        await AuthService.register(data);
+        await AuthService.register({
+            ...data,
+            profileImageUrl: '/img/default-profile.png'
+        });
         window.location.href = '/';
     } catch (error) {
         console.error('Error registering user:', error);
