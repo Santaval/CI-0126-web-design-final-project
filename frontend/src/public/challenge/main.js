@@ -106,8 +106,8 @@ function goToMatch(opponent) {
     challenges[opponent] = "active";
     statusLabel.textContent = `Comenzando partida con ${opponent}...`;
     setTimeout(() => {
-        // TODO : Redirigir a la página del juego con los parámetros necesarios
-        window.location.href = "/components/game/game.html";     
+        // TODO : Redirigir a la pï¿½gina del juego con los parï¿½metros necesarios
+        window.location.href = "/game";     
     }, 1000);
 }
 
