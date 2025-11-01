@@ -1,0 +1,13 @@
+{
+    "id": 1,
+    "cols": 10,
+    "rows": 10,
+    "shots": [
+        {"x": 1, "y": 2, "result": "miss", "playerID": 2, "createdAt": "2023-10-01T12:05:00Z"},
+        {"x": 5, "y": 7, "result": "hit", "playerID": 2, "createdAt": "2023-10-01T12:06:00Z"},
+        {"x": 2, "y": 3, "result": "miss", "playerID": 1, "createdAt": "2023-10-01T12:07:00Z"},
+        {"x": 4, "y": 5, "result": "hit", "playerID": 1, "createdAt": "2023-10-01T12:08:00Z"},
+        {"x": 3, "y": 4, "result": "hit", "playerID": 1, "createdAt": "2023-10-01T12:09:00Z"}
+    ],
+    "createdAt": "2023-10-01T12:00:00Z"
+}

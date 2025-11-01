@@ -1,0 +1,8 @@
+{
+    "id": 1,
+    "username": "example_user",
+    "password": "securepassword123",
+    "email": "example_user@example.com",
+    "imageUrl": "https://example.com/images/example_user.png",
+    "createdAt": "2023-10-01T11:00:00Z"
+}
