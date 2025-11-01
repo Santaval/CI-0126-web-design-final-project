@@ -101,7 +101,7 @@ body {
 
 .message.error {
     background-color: transparent;
-    color: #721c24; 
+    color: var(--color-primary); 
     font-size: 40px;
 }
 

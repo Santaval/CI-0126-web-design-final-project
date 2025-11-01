@@ -94,8 +94,6 @@ class battleShipGame{
             return;
         }
          
-        //Cambiamos el color 
-        cell.style.backgroundColor = '#00A22B';
     }
 
     handleMouseLeave(cell){
@@ -103,7 +101,6 @@ class battleShipGame{
             return;
         }
 
-        cell.style.backgroundColor = 'transparent';
     }
 
     async handleCellClick(cell) {
