@@ -1,0 +1,88 @@
+.setup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+
+.ships-pool {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 20px;
+    background-color: rgba(0, 53, 102, 0.3);
+    border-radius: 10px;
+    width: 80%;
+}
+
+.ship-to-place {
+    padding: 15px 25px;
+    background-color: var(--primary-color);
+    border: 2px solid var(--secondary-color);
+    border-radius: 5px;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 120px;
+}
+
+.ship-to-place:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-3px);
+}
+
+.ship-to-place.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+}
+
+.ship-to-place.placed {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #666;
+}
+
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.setup-board {
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
+    gap: 2px;
+    margin: 20px 0;
+}
+
+.setup-cell {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.setup-cell.valid-drop {
+    background-color: rgba(0, 162, 43, 0.3);
+}
+
+.setup-cell.invalid-drop {
+    background-color: rgba(244, 67, 54, 0.3);
+}
+
+.setup-cell.has-ship {
+    background-color: var(--primary-color);
+}
+
+.setup-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}

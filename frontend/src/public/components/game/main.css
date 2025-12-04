@@ -1,0 +1,120 @@
+:root {
+    --primary-color: #003566;
+    --secondary-color: #00A22B;
+    --accent-color: #FFD700;
+    --danger-color: #f44336;
+    --success-color: #4CAF50;
+    --bg-color: #000814;
+    --text-color: #FFFFFF;
+    --border-color: #4682B4;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+}
+
+.screen {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1 {
+    color: var(--accent-color);
+    margin: 30px 0;
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+h3 {
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin: 10px;
+    min-width: 150px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #002244;
+    transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(0, 162, 43, 0.1);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+.message {
+    padding: 15px 25px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: bold;
+    text-align: center;
+    min-width: 300px;
+}
+
+.message.success {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: var(--success-color);
+    border: 2px solid var(--success-color);
+}
+
+.message.error {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.message.info {
+    background-color: rgba(0, 53, 102, 0.2);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}

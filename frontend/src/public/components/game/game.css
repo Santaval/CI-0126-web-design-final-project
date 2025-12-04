@@ -1,122 +1,104 @@
-body {
-    background-color: #000814;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
-.game-container {
-    max-width: 600px;
-    margin: 50px auto;
-    background-color: transparent;
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 20px;
+    background-color: rgba(0, 53, 102, 0.3);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    position: relative;
-    text-align: center;
+    margin-bottom: 30px;
 }
 
-.game-info {
-    position: absolute;
-    top: 20px;
-    right: 60px;
-    text-align: right;
+.player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.attempts, .ships {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
+#player-name {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+#player-status {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+.game-boards {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
     gap: 2px;
-    justify-content: center;
-    margin: 80px auto 20px auto; 
+    margin: 20px 0;
 }
 
-.cell {
-    width: 60px;
-    height: 60px;
-    background-color: #000814;
-    border: 1px solid #999;
-    cursor: pointer;
+.board-cell {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    transition: background-color 0.2s;
-    color: white;
-}
-
-
-.cell:hover {
-    background-color: #00A22B; 
-}
-
-
-.cell.hit {
-    background-color: #4CAF50; 
-    color: white;
-    cursor: default;
-}
-
-.cell.miss {
-    background-color: #f44336; 
-    color: white;
-    cursor: default;
-}
-
-
-.cell.ship {
-    background-color: #2196F3; 
-}
-
-
-.message {
-    position: absolute;
-    top: 0; 
-    left: 50%;
-    transform: translateX(-50%);
-    display: grid;
-    place-items: center;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    text-align: center;
-    z-index: 9999; 
-    pointer-events: none; 
-}
-
-
-.message.success {
-    background-color: transparent;
-    color: #4682B4; 
-    font-size: 40px;
-}
-
-
-.message.error {
-    background-color: transparent;
-    color: #721c24; 
-    font-size: 40px;
-}
-
-.restart-btn {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007bff; 
-    color: white;
-    border: none;
-    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    transition: all 0.2s ease;
+    font-weight: bold;
 }
 
+.board-cell:hover {
+    background-color: rgba(0, 162, 43, 0.3);
+}
 
-.restart-btn:hover {
-    background-color: #003566; 
+.board-cell.hit {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.board-cell.miss {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #333;
+}
+
+.board-cell.ship {
+    background-color: var(--primary-color);
+}
+
+.board-cell.ship.hit {
+    background-color: var(--success-color);
+}
+
+.board-cell.occupied {
+    background-color: rgba(0, 53, 102, 0.5);
+}
+
+/* Deshabilitar celdas cuando no es tu turno */
+.board-cell.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.board-cell.disabled:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.game-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
 }
