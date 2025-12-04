@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/global/global.css" />
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/challenge/styles.css" />
+    <script type="module" src="/components/navbar/navbar.js" defer></script>
+
+    <title>Desafiar Jugadores</title>
+</head>
+
+<body>
+    <div data-include="navbar"></div>
+
+    <main class="challenge-container">
+        <section class="left-section">
+            <div class="player-card">
+                <img src="/img/avatarph.png" alt="Player Avatar" class="avatar" />
+                <p class="username" id="current-user">You</p>
+            </div>
+
+            <div class="challenge-status" id="challenge-status">
+                <p class="status-text">Elige un contrincante</p>
+            </div>
+        </section>
+
+        <section class="right-section">
+            <h3>Jugadores Disponibles</h3>
+            <div class="player-list" id="player-list">
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+    <script type="module" src="/components/navbar/navbar.js" defer></script>
+</body>
+</html>

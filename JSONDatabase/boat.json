@@ -1,0 +1,10 @@
+{
+    "id": 1,
+    "type": "destroyer",
+    "status": "afloat",
+    "size": 2,
+    "position": {"x": 1, "y": 1, "orientation": "horizontal"},
+    "boardID": 1,
+    "ownerID": 1,
+    "createdAt": "2023-10-01T12:00:00Z"
+}
