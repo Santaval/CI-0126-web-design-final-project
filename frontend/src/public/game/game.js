@@ -350,6 +350,23 @@ function handleGameStateUpdate(state) {
         });
         
         multiplayerManager.stopPolling();
+        
+        // Update statistics in the modal before showing it
+        if (state.statistics) {
+            const finalShots = document.getElementById('final-shots');
+            const finalAccuracy = document.getElementById('final-accuracy');
+            const finalSunk = document.getElementById('final-sunk');
+            
+            if (finalShots) finalShots.textContent = state.statistics.yourTotalShots;
+            if (finalAccuracy) {
+                const accuracy = state.statistics.yourTotalShots > 0 
+                    ? Math.round((state.statistics.yourHits / state.statistics.yourTotalShots) * 100)
+                    : 0;
+                finalAccuracy.textContent = `${accuracy}%`;
+            }
+            if (finalSunk) finalSunk.textContent = `${state.statistics.yourSunkShips.length}/5`;
+        }
+        
         gameUI.showGameOver(state.youWon);
         
         // Update game status display

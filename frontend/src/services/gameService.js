@@ -310,10 +310,16 @@ class GameService {
             throw new Error('Player not found in this game');
         }
 
-        // Update player's last seen timestamp
-        player.lastSeen = new Date();
-        player.isConnected = true;
-        await game.save();
+        // Update player's last seen timestamp atomically to avoid version conflicts
+        await Game.updateOne(
+            { _id: game._id, 'players.playerId': playerIdStr },
+            { 
+                $set: { 
+                    'players.$.lastSeen': new Date(),
+                    'players.$.isConnected': true
+                }
+            }
+        );
 
         // Get opponent info
         const opponent = game.getOpponent(playerIdStr);

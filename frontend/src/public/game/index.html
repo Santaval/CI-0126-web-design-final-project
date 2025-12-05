@@ -146,6 +146,37 @@
         </div>
     </div>
 
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="game-over-modal" style="display: none;">
+        <div class="game-over-content">
+            <div class="game-over-icon" id="game-over-icon">🏆</div>
+            <h1 class="game-over-title" id="game-over-title">¡Victoria!</h1>
+            <p class="game-over-message" id="game-over-message">¡Felicidades! ¡Has ganado la batalla!</p>
+            <div class="game-over-stats" id="game-over-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Disparos realizados:</span>
+                    <span class="stat-value" id="final-shots">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Precisión:</span>
+                    <span class="stat-value" id="final-accuracy">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Barcos hundidos:</span>
+                    <span class="stat-value" id="final-sunk">5/5</span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="return-to-challenges" class="btn-primary btn-large">
+                    <span class="icon">🎯</span> Volver a Desafíos
+                </button>
+                <button id="view-game" class="btn-secondary btn-large">
+                    <span class="icon">👁️</span> Ver Partida
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Include the modular game script -->
     <script type="module" src="game.js"></script>
 </body>

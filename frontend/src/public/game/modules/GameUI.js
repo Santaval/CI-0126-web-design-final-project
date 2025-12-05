@@ -330,25 +330,50 @@ export class GameUI {
     }
 
     showGameOver(youWon = null) {
+        // Get modal elements
+        const modal = document.getElementById('game-over-modal');
+        const icon = document.getElementById('game-over-icon');
+        const title = document.getElementById('game-over-title');
+        const message = document.getElementById('game-over-message');
+        const returnBtn = document.getElementById('return-to-challenges');
+        const viewBtn = document.getElementById('view-game');
+        
         // Multiplayer mode
         if (youWon !== null) {
-            const message = youWon ?
-                '🎉 ¡Felicidades! ¡Has ganado la batalla!' :
-                '💀 ¡Has perdido! Mejor suerte la próxima vez';
-            
-            this.showMessage(message, youWon ? 'success' : 'error');
-            
-            if (this.elements.gameStatus) {
-                this.elements.gameStatus.textContent = youWon ? '¡Victoria!' : 'Derrota';
+            // Set modal content based on win/loss
+            if (youWon) {
+                modal.className = 'game-over-modal victory';
+                icon.textContent = '🏆';
+                title.textContent = '¡Victoria!';
+                message.textContent = '¡Felicidades! ¡Has ganado la batalla!';
+            } else {
+                modal.className = 'game-over-modal defeat';
+                icon.textContent = '💀';
+                title.textContent = 'Derrota';
+                message.textContent = '¡Has perdido! Mejor suerte la próxima vez';
             }
             
-            // Add button to return to challenges
-            setTimeout(() => {
-                const returnButton = confirm(message + '\n\n¿Deseas volver a la página de desafíos?');
-                if (returnButton) {
-                    window.location.href = '/challenge';
-                }
-            }, 2000);
+            // Update stats in modal (if available from gameManager)
+            if (this.gameManager.multiplayerManager) {
+                const finalShots = document.getElementById('final-shots');
+                const finalAccuracy = document.getElementById('final-accuracy');
+                const finalSunk = document.getElementById('final-sunk');
+                
+                // These will be updated from the last game state
+                // For now, we can leave placeholder values or hide stats section
+            }
+            
+            // Show modal
+            modal.style.display = 'flex';
+            
+            // Set up button handlers
+            returnBtn.onclick = () => {
+                window.location.href = '/challenge';
+            };
+            
+            viewBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
         } 
         // Local game mode
         else if (this.game && this.game.winner) {
