@@ -5,6 +5,7 @@ const path = require('path');
 const session = require('express-session');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
+const challengeRoutes = require('./routes/challenge');
 const connectDB = require('./config/database');
 
 const app = express();
@@ -38,6 +39,9 @@ app.use(passport.session());
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Challenge routes
+app.use('/api/challenge', challengeRoutes);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, './public')));
