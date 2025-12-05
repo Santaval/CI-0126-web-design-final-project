@@ -1,12 +1,13 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
+const challengeRoutes = require('./routes/challenge');
 const connectDB = require('./config/database');
-const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
@@ -60,27 +61,13 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/game', gameRoutes);
 
+// Challenge routes
+app.use('/api/challenge', challengeRoutes);
+
 
 // Servir archivos estaticos si es necesario
 app.use(express.static(path.join(__dirname, './public')));
 
-// Ruta por defecto
-// app.get('/', (req, res) => {
-//     res.json({
-//         message: 'Battleship Multiplayer Server',
-//         endpoints: [
-//             'GET  /api/test - Probar conexion',
-//             'POST /api/game/create - Crear juego',
-//             'POST /api/game/join - Unirse a juego',
-//             'POST /api/game/place-ships - Colocar barcos',
-//             'POST /api/game/attack - Realizar ataque',
-//             'GET  /api/game/poll/:gameId/:playerId - Polling estado',
-//             'GET  /api/status - Estado del servidor',
-//             'GET  /api/games/list - Listar juegos activos',
-//             'GET  /api/game/find/:gameCode - Buscar juego por codigo'
-//         ]
-//     });
-// });
 
 app.listen(PORT, () => {
     console.log(`Battleship Server running on http://localhost:${PORT}`);
