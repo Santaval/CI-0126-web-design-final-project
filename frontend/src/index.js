@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
+const gameRoutes = require('./routes/game');
 const connectDB = require('./config/database');
 const path = require('path');
 const morgan = require('morgan');
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/game', gameRoutes);
 
 
 // Servir archivos estaticos si es necesario
