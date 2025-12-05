@@ -9,12 +9,59 @@
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="game.css">
     <link rel="stylesheet" href="setup.css">
+    <link rel="stylesheet" href="multiplayer.css">
 </head>
 <body>
+    <!-- MULTIPLAYER LOBBY: Create or Join Game -->
+    <div id="lobby-screen" class="screen">
+        <div class="lobby-container">
+            <h1>⚓ Battleship Multiplayer</h1>
+            <div class="lobby-options">
+                <div class="lobby-option">
+                    <h2>🎮 Crear Partida</h2>
+                    <input type="text" id="create-player-name" placeholder="Tu nombre" maxlength="20" />
+                    <button id="create-game-btn" class="btn-primary">Crear Sala</button>
+                </div>
+                <div class="lobby-divider">O</div>
+                <div class="lobby-option">
+                    <h2>🔗 Unirse a Partida</h2>
+                    <input type="text" id="join-player-name" placeholder="Tu nombre" maxlength="20" />
+                    <input type="text" id="join-game-code" placeholder="Código de sala (ej: ABC123)" maxlength="6" style="text-transform: uppercase" />
+                    <button id="join-game-btn" class="btn-primary">Unirse</button>
+                </div>
+            </div>
+            <div class="lobby-message" id="lobby-message"></div>
+        </div>
+    </div>
+
+    <!-- WAITING ROOM: Waiting for opponent -->
+    <div id="waiting-screen" class="screen" style="display: none;">
+        <div class="waiting-container">
+            <h1>⏳ Esperando Oponente</h1>
+            <div class="game-code-display">
+                <p>Código de Sala:</p>
+                <h2 id="display-game-code">------</h2>
+                <button id="copy-code-btn" class="btn-secondary">📋 Copiar Código</button>
+            </div>
+            <div class="waiting-info">
+                <p>Comparte este código con tu oponente para que se una a la partida.</p>
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Esperando a que el jugador 2 se una...</p>
+                </div>
+            </div>
+            <button id="cancel-waiting-btn" class="btn-danger">Cancelar</button>
+        </div>
+    </div>
+
     <!-- SETUP SCREEN: Place ships -->
-    <div id="setup-screen" class="screen">
+    <div id="setup-screen" class="screen" style="display: none;">
         <div class="setup-header">
             <h1>⚓ Coloca tus Barcos</h1>
+            <div class="opponent-status">
+                <span id="opponent-name">Esperando...</span>
+                <span id="opponent-ready-status" class="status-badge">⏳ No listo</span>
+            </div>
         </div>
         <div class="setup-container">
             <div class="setup-left">
@@ -67,6 +114,8 @@
             <div class="player-info">
                 <div class="player-identity">
                     <span id="player-name">Jugador</span>
+                    <span class="vs-text">VS</span>
+                    <span id="opponent-player-name">Oponente</span>
                 </div>
                 <div class="player-status-indicator">
                     <span id="player-status">Es tu turno</span>

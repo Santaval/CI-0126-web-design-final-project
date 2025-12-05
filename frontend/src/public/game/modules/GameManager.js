@@ -9,17 +9,16 @@ export class GameManager {
     constructor() {
         this.currentGame = null;
         this.playerName = 'Jugador';
+        this.isMultiplayer = true; // Always multiplayer now
+        this.multiplayerManager = null; // Will be set externally
     }
 
-    startGame(playerName = 'Jugador') {
+    startGame(playerName = 'Jugador', opponentName = 'Oponente') {
         this.playerName = playerName;
         const humanPlayer = new Player(playerName);
-        const computerPlayer = new Player('CPU', true);
+        const opponentPlayer = new Player(opponentName);
         
-        this.currentGame = new Game(humanPlayer, computerPlayer);
-        
-        // CPU places ships randomly
-        computerPlayer.placeShipsRandomly();
+        this.currentGame = new Game(humanPlayer, opponentPlayer);
         
         return this.currentGame;
     }
@@ -33,66 +32,90 @@ export class GameManager {
         this.currentGame.startGame();
     }
 
-    makeMove(row, col) {
+    async makeMove(row, col) {
         if (!this.currentGame || this.currentGame.status !== GameConstants.GAME_STATUS.PLAYING) {
             throw new Error('El juego no está en progreso');
         }
         
-        const result = this.currentGame.makeMove(row, col);
-        
-        // If game isn't over and it's CPU's turn, make CPU move
-        if (!result.gameOver && this.currentGame.getCurrentPlayer().isComputer) {
-            setTimeout(() => this.makeComputerMove(), 1000);
+        // In multiplayer, make API call
+        if (this.multiplayerManager) {
+            try {
+                const response = await this.multiplayerManager.attack(row, col);
+                
+                // Convert API response to game result format
+                const result = {
+                    row,
+                    col,
+                    result: response.result,
+                    sunkShip: response.sunkShip,
+                    gameOver: response.gameOver,
+                    winner: response.winner
+                };
+                
+                // Update local game state
+                this.updateLocalGameState(result);
+                
+                return result;
+            } catch (error) {
+                console.error('Error making move:', error);
+                throw error;
+            }
         }
         
-        return result;
+        // Fallback to local game (shouldn't happen)
+        return this.currentGame.makeMove(row, col);
     }
 
-    makeComputerMove() {
-        if (!this.currentGame || this.currentGame.status !== GameConstants.GAME_STATUS.PLAYING) {
-            return;
+    updateLocalGameState(attackResult) {
+        if (!this.currentGame) return;
+
+        const opponent = this.currentGame.getOpponent();
+        
+        // Record the attack
+        if (attackResult.result === GameConstants.ATTACK_RESULT.HIT || 
+            attackResult.result === 'hit' || attackResult.result === 'sunk') {
+            opponent.board.hits.push({
+                row: attackResult.row,
+                col: attackResult.col
+            });
+        } else if (attackResult.result === GameConstants.ATTACK_RESULT.MISS || 
+                   attackResult.result === 'miss') {
+            opponent.board.misses.push({
+                row: attackResult.row,
+                col: attackResult.col
+            });
         }
-        
-        const currentPlayer = this.currentGame.getCurrentPlayer();
-        if (!currentPlayer.isComputer) {
-            return;
+
+        // Handle game over
+        if (attackResult.gameOver) {
+            this.currentGame.status = GameConstants.GAME_STATUS.FINISHED;
+            this.currentGame.winner = attackResult.winner === this.multiplayerManager.playerNumber 
+                ? this.currentGame.players[0] 
+                : this.currentGame.players[1];
         }
+    }
+
+    updateOpponentMoves(opponentMoves) {
+        if (!this.currentGame) return;
+
+        const playerBoard = this.currentGame.players[0].board;
         
-        let row, col;
-        let validMove = false;
-        let attempts = 0;
-        
-        // Find a valid cell to attack
-        while (!validMove && attempts < 100) {
-            row = Math.floor(Math.random() * GameConstants.BOARD_SIZE);
-            col = Math.floor(Math.random() * GameConstants.BOARD_SIZE);
-            
-            const opponent = this.currentGame.getOpponent();
-            const alreadyHit = opponent.board.hits.some(h => h.row === row && h.col === col);
-            const alreadyMissed = opponent.board.misses.some(m => m.row === row && m.col === col);
-            
-            if (!alreadyHit && !alreadyMissed) {
-                validMove = true;
-            }
-            
-            attempts++;
-        }
-        
-        if (validMove) {
-            const result = this.currentGame.makeMove(row, col);
-            
-            // Trigger UI update
-            if (window.gameUI) {
-                window.gameUI.updateGameState();
-                window.gameUI.renderBoards();
-                window.gameUI.showMessage(
-                    window.gameUI.getAttackMessage(result),
-                    result.result === GameConstants.ATTACK_RESULT.MISS ? 'info' : 'error'
-                );
-                
-                if (result.gameOver) {
-                    window.gameUI.showGameOver();
-                }
+        // Clear existing hits and misses
+        playerBoard.hits = [];
+        playerBoard.misses = [];
+
+        // Add all opponent moves
+        for (const move of opponentMoves) {
+            if (move.result === 'hit' || move.result === 'sunk') {
+                playerBoard.hits.push({
+                    row: move.row,
+                    col: move.col
+                });
+            } else if (move.result === 'miss') {
+                playerBoard.misses.push({
+                    row: move.row,
+                    col: move.col
+                });
             }
         }
     }

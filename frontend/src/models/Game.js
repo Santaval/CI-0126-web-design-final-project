@@ -147,9 +147,8 @@ gameSchema.methods.getOpponent = function(playerId) {
 };
 
 // Update lastUpdated timestamp before saving
-gameSchema.pre('save', function(next) {
+gameSchema.pre('save', function() {
     this.lastUpdated = new Date();
-    next();
 });
 
 // Clean up old games (games in 'waiting' status older than 1 hour)

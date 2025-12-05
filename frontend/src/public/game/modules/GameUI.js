@@ -41,6 +41,12 @@ export class GameUI {
         this.elements.newGameBtn?.addEventListener('click', () => this.newGame());
     }
 
+    initializeGame() {
+        this.game = this.gameManager.currentGame;
+        this.updatePlayerInfo();
+        this.updateGameState();
+    }
+
     showGameScreen(game) {
         this.game = game;
         
@@ -65,7 +71,7 @@ export class GameUI {
         
         if (this.game.status === GameConstants.GAME_STATUS.PLAYING) {
             this.elements.playerStatus.textContent = isPlayerTurn ? 
-                'Es tu turno' : 'Turno de la CPU';
+                'Es tu turno' : 'Turno del oponente';
             this.elements.playerStatus.style.color = isPlayerTurn ? 
                 '#00A22B' : '#f44336';
         } else if (this.game.status === GameConstants.GAME_STATUS.FINISHED) {
@@ -145,6 +151,13 @@ export class GameUI {
     }
 
     handleCellClick(row, col) {
+        // Check if multiplayer and if it's your turn
+        if (this.gameManager.multiplayerManager) {
+            this.handleMultiplayerAttack(row, col);
+            return;
+        }
+        
+        // Fallback to local game (shouldn't happen)
         const isPlayerTurn = this.game.getCurrentPlayer() === this.game.players[0];
         if (!isPlayerTurn || this.game.status !== GameConstants.GAME_STATUS.PLAYING) {
             return;
@@ -161,6 +174,41 @@ export class GameUI {
 
             if (result.gameOver) {
                 this.showGameOver();
+            }
+
+        } catch (error) {
+            console.error('Error al procesar el ataque:', error);
+            this.showMessage(error.message, 'error');
+        }
+    }
+
+    async handleMultiplayerAttack(row, col) {
+        try {
+            this.showMessage('Atacando...', 'info');
+            
+            const result = await this.gameManager.makeMove(row, col);
+            
+            this.renderBoards();
+            
+            // Show attack result
+            let message = '';
+            if (result.result === 'miss') {
+                message = 'Agua...';
+            } else if (result.result === 'hit') {
+                message = '¡Impacto!';
+            } else if (result.result === 'sunk') {
+                message = `¡Hundiste el ${result.sunkShip}!`;
+            }
+            
+            this.showMessage(message, result.result === 'miss' ? 'error' : 'success');
+
+            if (result.gameOver) {
+                this.showGameOver(result.winner === this.gameManager.multiplayerManager.playerNumber);
+            } else {
+                // Update turn status
+                setTimeout(() => {
+                    this.showMessage('Turno del oponente...', 'info');
+                }, 1500);
             }
 
         } catch (error) {
@@ -244,14 +292,31 @@ export class GameUI {
         return statusMap[status] || 'Desconocido';
     }
 
-    showGameOver() {
-        if (this.game && this.game.winner) {
+    showGameOver(youWon = null) {
+        // Multiplayer mode
+        if (youWon !== null) {
+            const message = youWon ?
+                '🎉 ¡Felicidades! ¡Has ganado la batalla!' :
+                '💀 ¡Has perdido! Mejor suerte la próxima vez';
+            
+            this.showMessage(message, youWon ? 'success' : 'error');
+            
+            if (this.elements.gameStatus) {
+                this.elements.gameStatus.textContent = youWon ? '¡Victoria!' : 'Derrota';
+            }
+        } 
+        // Local game mode
+        else if (this.game && this.game.winner) {
             const message = this.game.winner === this.game.players[0] ?
                 '¡Felicidades! ¡Has ganado!' :
                 '¡Has perdido! Mejor suerte la próxima vez';
             
             this.showMessage(message, this.game.winner === this.game.players[0] ? 'success' : 'error');
         }
+        
+        // Show/hide buttons
+        if (this.elements.newGameBtn) this.elements.newGameBtn.style.display = 'block';
+        if (this.elements.surrenderBtn) this.elements.surrenderBtn.style.display = 'none';
     }
 
     surrender() {

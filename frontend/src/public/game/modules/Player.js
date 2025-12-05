@@ -6,9 +6,8 @@ import { Ship } from './Ship.js';
 // PLAYER CLASS
 // =============================================
 export class Player {
-    constructor(name, isComputer = false) {
+    constructor(name) {
         this.name = name;
-        this.isComputer = isComputer;
         this.board = new Board();
         this.attackBoard = new Board();
         this.ready = false;
