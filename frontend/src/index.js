@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
+const challengeRoutes = require('./routes/challenge');
 const connectDB = require('./config/database');
 const path = require('path');
 const morgan = require('morgan');
@@ -58,6 +59,10 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
+// Challenge routes
+app.use('/api/challenge', challengeRoutes);
+
+// Serve static files
 // ALMACENAMIENTO MEJORADO
 const activeGames = new Map();  // Para buscar por gameId
 const gamesByCode = new Map();  // Para buscar por gameCode

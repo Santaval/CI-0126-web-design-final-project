@@ -6,6 +6,7 @@
     min-height: 100vh;
     color: var(--color-text);
     background-color: var(--color-background);
+    gap: var(--spacing-large);
 }
 
 /*  Challenge Section */
@@ -18,6 +19,13 @@
     text-align: center;
 }
 
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-small);
+}
+
 .avatar {
     width: 150px;
     height: 150px;
@@ -28,6 +36,8 @@
     justify-content: center;
     font-size: var(--font-size-large);
     color: var(--color-background);
+    object-fit: cover;
+    border: 3px solid var(--color-primary);
 }
 
     .avatar.small {
@@ -35,12 +45,46 @@
         height: 50px;
         height: var(--size-medium);
         font-size: var(--font-size-medium);
+        min-width: 50px;
+        min-height: 50px;
     }
 
 .username {
     font-size: var(--font-size-medium);
     color: var(--color-text);
-    margin-top: var(--spacing-small);
+    margin: 0;
+    font-weight: 600;
+}
+
+.user-id {
+    font-size: var(--font-size-small);
+    color: var(--color-text);
+    opacity: 0.7;
+    margin: 0;
+}
+/* Challenge Details Section */
+.challenge-details {
+    width: 100%;
+    max-width: 500px;
+    background: var(--color-secondary);
+    border-radius: 20px;
+    padding: var(--spacing-large);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-medium);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+}
+
+
+.selected-player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-small);
+    padding: var(--spacing-medium);
+    background: rgba(255, 214, 10, 0.1);
+    border-radius: 10px;
 }
 
 .challenge-status {
@@ -52,6 +96,27 @@
     font-weight: 500;
 }
 
+.status-text {
+    font-size: var(--font-size-medium);
+    color: var(--color-primary);
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.challenge-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-small);
+    width: 100%;
+}
+
+    .challenge-actions button {
+        width: 100%;
+        padding: var(--spacing-medium);
+        font-size: var(--font-size-medium);
+    }
+
 /* Player List Section*/
 .right-section {
     flex: 1;
@@ -62,12 +127,20 @@
     flex-direction: column;
     gap: var(--spacing-medium);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.right-section h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-large);
 }
 
 .player-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-medium);
+    gap: var(--spacing-small);
 }
 
 .player-item {
@@ -75,23 +148,89 @@
     align-items: center;
     justify-content: space-between;
     background: var(--color-background);
-    border: 1px solid var(--color-primary);
+    border: 2px solid transparent;
     border-radius: 15px;
     padding: var(--spacing-small) var(--spacing-medium);
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 }
 
     .player-item:hover {
         background-color: rgba(255, 214, 10, 0.08);
+        border-color: var(--color-primary);
     }
 
+    .player-item.selected {
+        background-color: rgba(255, 214, 10, 0.15);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 10px rgba(255, 214, 10, 0.3);
+    }
     .player-item .info {
         display: flex;
         align-items: center;
         gap: var(--spacing-medium);
     }
 
-    .primary-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+    .status-badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--color-primary);
+        color: var(--color-background);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
     }
+
+    /* Button Styles */
+    .primary-button {
+        background: var(--color-primary);
+        color: var(--color-background);
+        border: none;
+        padding: var(--spacing-small) var(--spacing-medium);
+        border-radius: 10px;
+        font-size: var(--font-size-medium);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .primary-button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+        .primary-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+.secondary-button {
+    background: transparent;
+    color: var(--color-text);
+    border: 2px solid var(--color-text);
+    padding: var(--spacing-small) var(--spacing-medium);
+    border-radius: 10px;
+    font-size: var(--font-size-medium);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .secondary-button:hover {
+        background: var(--color-text);
+        color: var(--color-background);
+    }
+/* Responsive Design */
+@media (max-width: 768px) {
+    .challenge-container {
+        flex-direction: column;
+    }
+}
+
+.right-section {
+    max-height: 50vh;
+}
