@@ -212,4 +212,112 @@ router.put('/user', async (req, res) => {
     }
 });
 
+// Search users endpoint
+router.get('/users/search', async (req, res) => {
+    try {
+        const { q, limit = 10, exclude } = req.query;
+
+        // Build search query
+        let searchQuery = {};
+
+        // If search term provided, search by username or email
+        if (q && q.trim()) {
+            searchQuery = {
+                $or: [
+                    { username: { $regex: q.trim(), $options: 'i' } },
+                    { email: { $regex: q.trim(), $options: 'i' } }
+                ]
+            };
+        }
+
+        // Exclude specific user (useful for excluding current user)
+        if (exclude) {
+            searchQuery._id = { $ne: exclude };
+        }
+
+        // Execute search
+        const users = await User.find(searchQuery)
+            .select('username email imageUrl createdAt') // Only return public fields
+            .limit(parseInt(limit))
+            .sort({ username: 1 }); // Sort alphabetically
+
+        res.json({
+            success: true,
+            count: users.length,
+            users: users.map(user => user.toJSON())
+        });
+
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during search'
+        });
+    }
+});
+
+// Get all users (paginated)
+router.get('/users', async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const [users, total] = await Promise.all([
+            User.find()
+                .select('username email imageUrl createdAt')
+                .skip(skip)
+                .limit(parseInt(limit))
+                .sort({ createdAt: -1 }),
+            User.countDocuments()
+        ]);
+
+        res.json({
+            success: true,
+            users: users.map(user => user.toJSON()),
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / parseInt(limit))
+            }
+        });
+
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error fetching users'
+        });
+    }
+});
+
+// Get user by username
+router.get('/users/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        const user = await User.findOne({ username: username.toLowerCase() })
+            .select('username email imageUrl createdAt');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            user: user.toJSON()
+        });
+
+    } catch (error) {
+        console.error('Get user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error fetching user'
+        });
+    }
+});
+
 module.exports = router;
