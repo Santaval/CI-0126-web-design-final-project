@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/global/global.css" />
+    <link rel="stylesheet" href="/leaderboard/styles.css" />
+    <link rel="stylesheet" href="/components/avatar/avatar.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Leaderboard - Battleship</title>
+  </head>
+  <body>
+    <!-- TOP NAVIGATION BAR (loaded from partial) -->
+    <div data-include="navbar"></div>
+    <!-- TOP NAVIGATION END -->
+
+    <main>
+      <section id="leaderboard-section">
+        <header>
+          <h1>Leaderboard</h1>
+          <p class="subtitle">Top Battleship Players</p>
+        </header>
+
+        <!-- User's Rank Card -->
+        <div id="user-rank-card" class="user-rank-card loading">
+          <div class="loading-text">Loading your rank...</div>
+        </div>
+
+        <!-- Filter Options -->
+        <div class="filter-controls">
+          <button class="filter-btn active" data-filter="wins">
+             Most Wins
+          </button>
+          <button class="filter-btn" data-filter="winrate">
+            Best Win Rate
+          </button>
+          <button class="filter-btn" data-filter="games">
+            Most Games
+          </button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div id="leaderboard-container" class="loading">
+          <div class="loading-text">Loading leaderboard...</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Scripts -->
+    <script type="module" src="/components/navbar/navbar.js"></script>
+    <script type="module" src="/leaderboard/main.js"></script>
+  </body>
+</html>

@@ -58,4 +58,22 @@ router.get('/ranking', isAuthenticated, async (req, res) => {
     }
 });
 
+/**
+ * GET /api/stats/leaderboard
+ * Get full leaderboard (all players)
+ */
+router.get('/leaderboard', isAuthenticated, async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const leaderboard = await statsService.getFullLeaderboard(limit);
+        res.json(leaderboard);
+    } catch (error) {
+        console.error('Error getting leaderboard:', error);
+        res.status(500).json({ 
+            error: 'Failed to get leaderboard',
+            message: error.message 
+        });
+    }
+});
+
 module.exports = router;

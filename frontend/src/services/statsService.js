@@ -252,6 +252,45 @@ class StatsService {
             userStats: rankings.find(r => r.userId.toString() === userIdStr)
         };
     }
+
+    /**
+     * Get full leaderboard
+     * @param {number} limit - Maximum number of players to return
+     * @returns {Array} Leaderboard rankings
+     */
+    async getFullLeaderboard(limit = 100) {
+        // Get all users with their stats
+        const allUsers = await User.find({});
+        const rankings = [];
+
+        for (const user of allUsers) {
+            const games = await Game.find({
+                'players.playerId': user._id.toString(),
+                status: 'finished'
+            });
+
+            const wins = games.filter(g => g.winner === user._id.toString()).length;
+            const totalGames = games.length;
+            const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+
+            rankings.push({
+                userId: user._id,
+                username: user.username,
+                avatar: user.avatar,
+                wins,
+                totalGames,
+                winRate
+            });
+        }
+
+        // Sort by wins (primary) and win rate (secondary)
+        rankings.sort((a, b) => {
+            if (b.wins !== a.wins) return b.wins - a.wins;
+            return b.winRate - a.winRate;
+        });
+
+        return rankings.slice(0, limit);
+    }
 }
 
 module.exports = new StatsService();
