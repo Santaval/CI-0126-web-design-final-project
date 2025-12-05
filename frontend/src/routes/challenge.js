@@ -204,6 +204,9 @@ router.post('/accept/:challengeId', requireAuth, async (req, res) => {
       });
     }
 
+    // join the game
+    await gameService.joinGame(challenge.gameCode, req.user._id);
+
     challenge.status = 'accepted';
     challenge.updatedAt = new Date();
     await challenge.save();

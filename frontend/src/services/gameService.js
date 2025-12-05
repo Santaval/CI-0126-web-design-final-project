@@ -1,5 +1,4 @@
 const Game = require('../models/Game');
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * Game Service - Business logic for game operations
@@ -65,13 +64,9 @@ class GameService {
      * @param {string} playerName - Name of the joining player
      * @returns {Object} Join result with gameId, playerId, opponentName
      */
-    async joinGame(gameCode, playerName) {
+    async joinGame(gameCode, playerId) {
         if (!gameCode || gameCode.trim() === '') {
             throw new Error('Game code is required');
-        }
-
-        if (!playerName || playerName.trim() === '') {
-            throw new Error('Player name is required');
         }
 
         // Find the game by code
@@ -91,13 +86,9 @@ class GameService {
             throw new Error(`Cannot join game. Game status is '${game.status}'`);
         }
 
-        // Generate unique player ID for player 2
-        const playerId = uuidv4();
-
         // Add player 2 to the game
         game.players.push({
             playerId,
-            playerName: playerName.trim(),
             playerNumber: 2,
             ready: false,
             isConnected: true,
@@ -112,14 +103,13 @@ class GameService {
         // Get opponent (player 1) name
         const opponent = game.getPlayer(1);
 
-        console.log(`Player ${playerName} (${playerId}) joined game ${gameCode}`);
+        console.log(`Player (${playerId}) joined game ${gameCode}`);
 
         return {
             gameId: game._id.toString(),
             gameCode: game.gameCode,
             playerId,
             playerNumber: 2,
-            opponentName: opponent.playerName,
             message: `Successfully joined game ${gameCode}`
         };
     }
