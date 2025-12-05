@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
+const gameService = require('../services/gameService');
 
 // Middleware to check authentication
 const requireAuth = (req, res, next) => {
@@ -139,11 +140,15 @@ router.post('/send', requireAuth, async (req, res) => {
       });
     }
 
+    const match = await gameService.createGame(challengerId);
+
     // Create new challenge
     const challenge = new Challenge({
       challenger: challengerId,
       challenged: challengedUser._id,
-      status: 'pending'
+      status: 'pending',
+      gameCode: match.gameCode
+      
     });
 
     await challenge.save();
@@ -172,6 +177,8 @@ router.post('/accept/:challengeId', requireAuth, async (req, res) => {
   try {
     const { challengeId } = req.params;
     const userId = req.user._id;
+
+
 
     const challenge = await Challenge.findById(challengeId);
 

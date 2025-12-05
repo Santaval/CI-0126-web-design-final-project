@@ -10,10 +10,7 @@ class GameService {
      * @param {string} playerName - Name of the player creating the game
      * @returns {Object} Game creation result with gameCode, gameId, playerId
      */
-    async createGame(playerName) {
-        if (!playerName || playerName.trim() === '') {
-            throw new Error('Player name is required');
-        }
+    async createGame(playerId) {
 
         // Generate unique game code
         let gameCode;
@@ -32,16 +29,12 @@ class GameService {
             throw new Error('Failed to generate unique game code. Please try again.');
         }
 
-        // Generate unique player ID
-        const playerId = uuidv4();
-
         // Create new game
         const newGame = new Game({
             gameCode,
             status: 'waiting',
             players: [{
                 playerId,
-                playerName: playerName.trim(),
                 playerNumber: 1,
                 ready: false,
                 isConnected: true,
@@ -56,7 +49,6 @@ class GameService {
 
         await newGame.save();
 
-        console.log(`Game created: ${gameCode} by ${playerName} (${playerId})`);
 
         return {
             gameCode,

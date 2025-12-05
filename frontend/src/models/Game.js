@@ -20,10 +20,6 @@ const gameSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        playerName: {
-            type: String,
-            required: true
-        },
         playerNumber: {
             type: Number,
             min: 1,
