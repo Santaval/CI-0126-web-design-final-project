@@ -192,6 +192,54 @@ function handleGameStateUpdate(state) {
     
     // Both players ready - transition to playing
     if (state.gameStatus === 'playing' && getCurrentScreen() !== 'game') {
+        console.log('Transitioning to playing state');
+        console.log('Full state:', state);
+        
+        // Make sure game is initialized
+        if (!gameManager.currentGame) {
+            console.log('Initializing game for playing state');
+            gameManager.startGame(multiplayerManager.playerName, state.opponentName || 'Oponente');
+        }
+        
+        // Load ships into the local game if available
+        if (gameManager.currentGame && state.yourShips && state.yourShips.length > 0) {
+            console.log('Loading your ships into local game:', state.yourShips);
+            console.log('Raw ship data:', JSON.stringify(state.yourShips, null, 2));
+            try {
+                // Transform ship data from backend format to Player.placeShips format
+                const transformedShips = state.yourShips.map(ship => {
+                    console.log('Processing ship:', ship);
+                    if (!ship.positions || ship.positions.length === 0) {
+                        console.error('Ship has no positions:', ship);
+                        return null;
+                    }
+                    return {
+                        shipId: ship.shipId,
+                        startRow: ship.positions[0].row,
+                        startCol: ship.positions[0].col,
+                        orientation: ship.orientation
+                    };
+                }).filter(ship => ship !== null);
+                
+                console.log('Transformed ships:', transformedShips);
+                if (transformedShips.length > 0) {
+                    gameManager.currentGame.players[0].placeShips(transformedShips);
+                    console.log('Ships placed successfully');
+                } else {
+                    console.error('No valid ships to place');
+                }
+            } catch (error) {
+                console.error('Error placing ships:', error);
+            }
+        } else {
+            console.log('No ships to load. state.yourShips:', state.yourShips);
+        }
+        
+        // Ensure game status is set to PLAYING
+        if (gameManager.currentGame) {
+            gameManager.currentGame.status = GameConstants.GAME_STATUS.PLAYING;
+        }
+        
         showScreen('game');
         gameUI.initializeGame();
         gameUI.renderBoards();
@@ -199,6 +247,44 @@ function handleGameStateUpdate(state) {
     
     // Update game state during play
     if (state.gameStatus === 'playing' && getCurrentScreen() === 'game') {
+        // Load ships if not already loaded
+        if (gameManager.currentGame && state.yourShips && state.yourShips.length > 0) {
+            const player = gameManager.currentGame.players[0];
+            const hasShips = player && player.board && player.board.ships && player.board.ships.length > 0;
+            
+            if (!hasShips) {
+                console.log('Loading ships during game update:', state.yourShips);
+                console.log('Raw ship data:', JSON.stringify(state.yourShips, null, 2));
+                try {
+                    // Transform ship data from backend format to Player.placeShips format
+                    const transformedShips = state.yourShips.map(ship => {
+                        console.log('Processing ship:', ship);
+                        if (!ship.positions || ship.positions.length === 0) {
+                            console.error('Ship has no positions:', ship);
+                            return null;
+                        }
+                        return {
+                            shipId: ship.shipId,
+                            startRow: ship.positions[0].row,
+                            startCol: ship.positions[0].col,
+                            orientation: ship.orientation
+                        };
+                    }).filter(ship => ship !== null);
+                    
+                    console.log('Transformed ships:', transformedShips);
+                    if (transformedShips.length > 0) {
+                        player.placeShips(transformedShips);
+                        console.log('Ships loaded successfully, player ships:', player.board.ships);
+                        gameUI.renderBoards(); // Force re-render
+                    } else {
+                        console.error('No valid ships to place');
+                    }
+                } catch (error) {
+                    console.error('Error loading ships:', error);
+                }
+            }
+        }
+        
         // Update opponent's moves on player's board
         if (state.opponentMoves && state.opponentMoves.length > 0) {
             gameManager.updateOpponentMoves(state.opponentMoves);
@@ -226,8 +312,8 @@ function handleGameStateUpdate(state) {
             const attemptsEl = document.getElementById('attempts-count');
             
             if (shipsSunkEl) shipsSunkEl.textContent = `${state.statistics.yourSunkShips.length}/5`;
-            if (oppShipsRemainingEl) oppShipsRemainingEl.textContent = 5 - state.statistics.yourSunkShips.length;
-            if (playerShipsRemainingEl) playerShipsRemainingEl.textContent = 5 - state.statistics.opponentSunkShips.length;
+            if (oppShipsRemainingEl) oppShipsRemainingEl.textContent = state.statistics.opponentShipsRemaining;
+            if (playerShipsRemainingEl) playerShipsRemainingEl.textContent = state.statistics.yourShipsRemaining;
             if (hitsGivenEl) hitsGivenEl.textContent = state.statistics.yourHits;
             if (hitsTakenEl) hitsTakenEl.textContent = state.statistics.opponentHits;
             if (attemptsEl) attemptsEl.textContent = state.statistics.yourTotalShots;

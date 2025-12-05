@@ -144,8 +144,12 @@ class AttackService {
         let sunkShip = null;
 
         for (const ship of opponentShips) {
-            const shipSize = SHIP_SIZES[ship.type];
-            const shipCells = this.getShipCells(ship, shipSize);
+            // Use shipId instead of type, and positions array instead of position
+            const shipType = ship.shipId || ship.type;
+            const shipSize = SHIP_SIZES[shipType];
+            
+            // Ships are stored with positions array, not position object
+            const shipCells = ship.positions || this.getShipCells(ship, shipSize);
 
             // Check if target hits this ship
             const isHit = shipCells.some(
@@ -164,7 +168,7 @@ class AttackService {
                 // Add 1 for the current hit
                 if (shipHits.length + 1 === shipSize) {
                     result = 'sunk';
-                    sunkShip = ship.type;
+                    sunkShip = shipType;
                 }
 
                 break;

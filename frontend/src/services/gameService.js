@@ -160,11 +160,46 @@ class GameService {
         // Validate ships
         this.validateShips(ships);
 
+        // Convert ships to database format (expand position to positions array)
+        const shipSizes = {
+            'carrier': 5,
+            'battleship': 4,
+            'cruiser': 3,
+            'submarine': 3,
+            'destroyer': 2
+        };
+
+        const dbShips = ships.map(ship => {
+            const size = shipSizes[ship.type];
+            const positions = [];
+            
+            // Generate all positions based on start position, orientation, and size
+            for (let i = 0; i < size; i++) {
+                if (ship.orientation === 'horizontal') {
+                    positions.push({
+                        row: ship.position.row,
+                        col: ship.position.col + i
+                    });
+                } else {
+                    positions.push({
+                        row: ship.position.row + i,
+                        col: ship.position.col
+                    });
+                }
+            }
+
+            return {
+                shipId: ship.type,
+                positions: positions,
+                orientation: ship.orientation
+            };
+        });
+
         // Save ships based on player number
         if (player.playerNumber === 1) {
-            game.player1Ships = ships;
+            game.player1Ships = dbShips;
         } else {
-            game.player2Ships = ships;
+            game.player2Ships = dbShips;
         }
 
         // Mark player as ready
@@ -313,6 +348,10 @@ class GameService {
         const opponentMisses = opponentMoves.filter(m => m.result === 'miss').length;
         const opponentSunkShips = [...new Set(opponentMoves.filter(m => m.sunkShip).map(m => m.sunkShip))];
 
+        // Calculate remaining ships (total 5 ships minus sunk ships)
+        const yourShipsRemaining = 5 - opponentSunkShips.length; // Your remaining = 5 - what opponent sunk
+        const opponentShipsRemaining = 5 - yourSunkShips.length; // Opponent remaining = 5 - what you sunk
+
         // Prepare response
         return {
             gameCode: game.gameCode,
@@ -336,6 +375,9 @@ class GameService {
             yourShipsPlaced,
             yourReady: player.ready,
             
+            // Your ships (for displaying on your board)
+            yourShips: yourShipsPlaced ? yourShips : null,
+            
             // Moves
             yourMoves: yourMoves.map(m => ({
                 row: m.row,
@@ -357,10 +399,12 @@ class GameService {
                 yourHits,
                 yourMisses,
                 yourSunkShips,
+                yourShipsRemaining,
                 yourTotalShots: yourMoves.length,
                 opponentHits,
                 opponentMisses,
                 opponentSunkShips,
+                opponentShipsRemaining,
                 opponentTotalShots: opponentMoves.length
             },
             

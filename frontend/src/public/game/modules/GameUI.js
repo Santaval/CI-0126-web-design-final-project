@@ -81,13 +81,28 @@ export class GameUI {
     }
 
     renderBoards() {
-        if (!this.game) return;
+        console.log('renderBoards called, this.game:', this.game);
+        console.log('gameManager.currentGame:', this.gameManager.currentGame);
+        
+        if (!this.game) {
+            console.warn('No game object, trying to use gameManager.currentGame');
+            this.game = this.gameManager.currentGame;
+        }
+        
+        if (!this.game) {
+            console.error('Still no game object, cannot render boards');
+            return;
+        }
 
+        console.log('Clearing boards and rendering...');
         this.elements.playerBoard.innerHTML = '';
         this.elements.opponentBoard.innerHTML = '';
 
         const player = this.game.players[0];
         const opponent = this.game.players[1];
+        
+        console.log('Player:', player);
+        console.log('Opponent:', opponent);
 
         this.renderBoard(this.elements.playerBoard, player.board, false);
         this.renderBoard(this.elements.opponentBoard, player.attackBoard, true);
@@ -96,7 +111,18 @@ export class GameUI {
     }
 
     renderBoard(container, board, isClickable = false) {
-        const isPlayerTurn = this.game && this.game.getCurrentPlayer() === this.game.players[0];
+        // For multiplayer, check turn from game state instead of local game object
+        let isPlayerTurn = false;
+        
+        if (this.gameManager.multiplayerManager && this.gameManager.multiplayerManager.isGameActive) {
+            // In multiplayer, we'll rely on the game state update to set this properly
+            // For now, assume clickable board means it's player's turn
+            isPlayerTurn = true;
+        } else if (this.game) {
+            isPlayerTurn = this.game.getCurrentPlayer() === this.game.players[0];
+        }
+        
+        console.log('Rendering board - isClickable:', isClickable, 'isPlayerTurn:', isPlayerTurn, 'gameStatus:', this.game?.status);
         
         for (let row = 0; row < GameConstants.BOARD_SIZE; row++) {
             for (let col = 0; col < GameConstants.BOARD_SIZE; col++) {
@@ -119,10 +145,11 @@ export class GameUI {
                     cell.classList.add('ship');
                 }
 
-                if (isClickable && isPlayerTurn && this.game.status === GameConstants.GAME_STATUS.PLAYING) {
+                // Make opponent board cells clickable (isClickable = true for opponent board)
+                if (isClickable && !isHit && !isMiss) {
                     cell.addEventListener('click', () => this.handleCellClick(row, col));
                     cell.style.cursor = 'pointer';
-                } else {
+                } else if (isHit || isMiss) {
                     cell.classList.add('disabled');
                     cell.style.cursor = 'not-allowed';
                 }
