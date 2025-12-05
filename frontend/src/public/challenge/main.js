@@ -1,15 +1,18 @@
 import AuthService from "/utils/user.js";
 
 const playerList = document.getElementById("player-list");
+const challengeDetails = document.getElementById("challenge-details");
+const selectedAvatar = document.getElementById("selected-avatar");
+const selectedUsername = document.getElementById("selected-username");
 const statusLabel = document.querySelector("#challenge-status .status-text");
-const buttons = document.querySelectorAll(".challenge-btn");
+const challengeActions = document.getElementById("challenge-actions");
+const currentUserAvatar = document.getElementById("current-user-avatar");
 const currentsignedUser = document.querySelector("#current-user");
 
 let currentUser = null;
-
 let players = [];
+let selectedPlayer = null;
 let refreshInterval = null;
-let challenges = {};
 
 // Load user info
 async function init() {
@@ -18,7 +21,14 @@ async function init() {
         window.location.href = "/auth/login";
         return;
     }
+
+    // Set current user info
     currentsignedUser.textContent = currentUser.username || "You";
+
+    // Set current user avatar
+    if (currentUser.imageUrl && currentUser.imageUrl !== '/img/default-profile.png') {
+        currentUserAvatar.src = currentUser.imageUrl;
+    }
 
     await loadPlayers();
 
@@ -26,6 +36,7 @@ async function init() {
     refreshInterval = setInterval(loadPlayers, 3000);
 }
 
+// Load players from API
 async function loadPlayers() {
     try {
         const response = await fetch('/api/challenge/players', {
@@ -37,42 +48,19 @@ async function loadPlayers() {
         if (data.success) {
             players = data.players;
             renderPlayerList();
-            updateStatusMessage();
+
+            // Update selected player if one is selected
+            if (selectedPlayer) {
+                const updatedPlayer = players.find(p => p.username === selectedPlayer.username);
+                if (updatedPlayer) {
+                    selectPlayer(updatedPlayer);
+                }
+            }
         } else {
             console.error('Failed to load players:', data.message);
         }
     } catch (error) {
         console.error('Error loading players:', error);
-    }
-}
-
-function updateStatusMessage() {
-    // Check if there's any pending challenge sent by current user
-    const pendingChallenge = players.find(p => p.challengeStatus === 'pending' && p.isChallenger);
-
-    // Check if there's any received challenge
-    const receivedChallenge = players.find(p => p.challengeStatus === 'received');
-
-    // Check if there's an accepted challenge
-    const acceptedChallenge = players.find(p => p.challengeStatus === 'accepted');
-
-    // Check if there's a match in progress
-    const inProgressMatch = players.find(p => p.challengeStatus === 'in_progress');
-
-    if (inProgressMatch) {
-        statusLabel.textContent = `Partida en progreso con ${inProgressMatch.username}`;
-    } else if (acceptedChallenge) {
-        if (acceptedChallenge.isChallenger) {
-            statusLabel.textContent = `${acceptedChallenge.username} aceptó tu desafío! Puedes iniciar la partida.`;
-        } else {
-            statusLabel.textContent = `Desafío aceptado. Esperando a ${acceptedChallenge.username} para iniciar...`;
-        }
-    } else if (pendingChallenge) {
-        statusLabel.textContent = `Esperando respuesta de ${pendingChallenge.username}...`;
-    } else if (receivedChallenge) {
-        statusLabel.textContent = `¡${receivedChallenge.username} te ha desafiado!`;
-    } else {
-        statusLabel.textContent = "Elige un contrincante";
     }
 }
 
@@ -82,7 +70,14 @@ function renderPlayerList() {
     players.forEach((player) => {
         const playerItem = document.createElement("div");
         playerItem.classList.add("player-item");
+
+        // Highlight selected player
+        if (selectedPlayer && selectedPlayer.username === player.username) {
+            playerItem.classList.add("selected");
+        }
+
         playerItem.dataset.username = player.username;
+        playerItem.onclick = () => selectPlayer(player);
 
         const infoDiv = document.createElement("div");
         infoDiv.classList.add("info");
@@ -104,55 +99,165 @@ function renderPlayerList() {
         infoDiv.appendChild(avatarDiv);
         infoDiv.appendChild(nameSpan);
 
-        const button = document.createElement("button");
-        button.classList.add("primary-button");
-
-        switch (player.challengeStatus) {
-            case "pending":
-                if (player.isChallenger) {
-                    button.textContent = "Pendiente...";
-                    button.disabled = true;
-                } else {
-                    button.textContent = "Aceptar Desafío";
-                    button.onclick = () => acceptChallenge(player.challengeId);
-                }
-                break;
-
-            case "received":
-                button.textContent = "Aceptar Desafío";
-                button.onclick = () => acceptChallenge(player.challengeId);
-                break;
-
-            case "accepted":
-                if (player.isChallenger) {
-                    button.textContent = "Empezar Partida";
-                    button.onclick = () => startMatch(player.challengeId, player.username);
-                } else {
-                    button.textContent = "Esperando...";
-                    button.disabled = true;
-                }
-                break;
-
-            case "in_progress":
-                button.textContent = "Ir a Partida";
-                button.onclick = () => goToMatch(player.challengeId);
-                break;
-
-            case "rejected":
-                button.textContent = "Desafiar Nuevamente";
-                button.onclick = () => sendChallenge(player.username);
-                break;
-
-            default:
-                button.textContent = "Desafiar";
-                button.onclick = () => sendChallenge(player.username);
-                break;
+        // Add status badge if there's an active challenge
+        if (player.challengeStatus !== 'available') {
+            const statusBadge = document.createElement("span");
+            statusBadge.classList.add("status-badge");
+            statusBadge.textContent = getStatusBadgeText(player.challengeStatus, player.isChallenger);
+            playerItem.appendChild(statusBadge);
         }
 
         playerItem.appendChild(infoDiv);
-        playerItem.appendChild(button);
         playerList.appendChild(playerItem);
     });
+}
+
+function getStatusBadgeText(status, isChallenger) {
+    switch (status) {
+        case "pending":
+            return isChallenger ? "Enviado" : "Recibido";
+        case "received":
+            return "Recibido";
+        case "accepted":
+            return "Aceptado";
+        case "in_progress":
+            return "En Partida";
+        case "rejected":
+            return "Rechazado";
+        default:
+            return "";
+    }
+}
+
+function selectPlayer(player) {
+    selectedPlayer = player;
+
+    // Show challenge details section
+    challengeDetails.style.display = "block";
+
+    // Update selected player info
+    selectedUsername.textContent = player.username;
+
+    // Set avatar
+    if (player.imageUrl && player.imageUrl !== '/img/default-profile.png') {
+        selectedAvatar.src = player.imageUrl;
+    } else {
+        selectedAvatar.src = '/img/avatarph.png';
+    }
+
+    // Update status and actions
+    updateChallengeStatus(player);
+    updateChallengeActions(player);
+
+    // Re-render list to highlight selection
+    renderPlayerList();
+}
+
+function updateChallengeStatus(player) {
+    switch (player.challengeStatus) {
+        case "pending":
+            if (player.isChallenger) {
+                statusLabel.textContent = `Esperando respuesta de ${player.username}...`;
+            } else {
+                statusLabel.textContent = `${player.username} te ha desafiado!`;
+            }
+            break;
+
+        case "received":
+            statusLabel.textContent = `${player.username} te ha desafiado!`;
+            break;
+
+        case "accepted":
+            if (player.isChallenger) {
+                statusLabel.textContent = `${player.username} aceptó tu desafío! Puedes iniciar la partida.`;
+            } else {
+                statusLabel.textContent = `Desafío aceptado. Esperando a ${player.username} para iniciar...`;
+            }
+            break;
+
+        case "in_progress":
+            statusLabel.textContent = `Partida en progreso con ${player.username}`;
+            break;
+
+        case "rejected":
+            statusLabel.textContent = `${player.username} rechazó tu desafío.`;
+            break;
+
+        default:
+            statusLabel.textContent = `Listo para desafiar a ${player.username}`;
+            break;
+    }
+}
+
+function updateChallengeActions(player) {
+    challengeActions.innerHTML = "";
+
+    switch (player.challengeStatus) {
+        case "pending":
+            if (player.isChallenger) {
+                // Challenger can cancel
+                const cancelBtn = createButton("Cancelar Desafío", "secondary-button", () => cancelChallenge(player.challengeId));
+                challengeActions.appendChild(cancelBtn);
+            } else {
+                // Challenged can accept or reject
+                const acceptBtn = createButton("Aceptar", "primary-button", () => acceptChallenge(player.challengeId));
+                const rejectBtn = createButton("Rechazar", "secondary-button", () => rejectChallenge(player.challengeId));
+                challengeActions.appendChild(acceptBtn);
+                challengeActions.appendChild(rejectBtn);
+            }
+            break;
+
+        case "received":
+            const acceptBtn = createButton("Aceptar", "primary-button", () => acceptChallenge(player.challengeId));
+            const rejectBtn = createButton("Rechazar", "secondary-button", () => rejectChallenge(player.challengeId));
+            challengeActions.appendChild(acceptBtn);
+            challengeActions.appendChild(rejectBtn);
+            break;
+
+        case "accepted":
+            if (player.isChallenger) {
+                const startBtn = createButton("Empezar Partida", "primary-button", () => startMatch(player.challengeId, player.username));
+                const cancelBtn = createButton("Cancelar", "secondary-button", () => cancelChallenge(player.challengeId));
+                challengeActions.appendChild(startBtn);
+                challengeActions.appendChild(cancelBtn);
+            } else {
+                const waitingText = document.createElement("p");
+                waitingText.textContent = "Esperando al host...";
+                waitingText.style.fontStyle = "italic";
+                waitingText.style.color = "var(--color-text)";
+                waitingText.style.opacity = "0.7";
+                challengeActions.appendChild(waitingText);
+            }
+            break;
+
+        case "in_progress":
+            const goBtn = createButton("Ir a Partida", "primary-button", () => goToMatch(player.challengeId));
+            challengeActions.appendChild(goBtn);
+
+            if (player.isChallenger) {
+                const cancelBtn = createButton("Cancelar Partida", "secondary-button", () => cancelChallenge(player.challengeId));
+                challengeActions.appendChild(cancelBtn);
+            }
+            break;
+
+        case "rejected":
+            const rechallengeBtn = createButton("Desafiar Nuevamente", "primary-button", () => sendChallenge(player.username));
+            challengeActions.appendChild(rechallengeBtn);
+            break;
+
+        default:
+            const challengeBtn = createButton("Enviar Desafío", "primary-button", () => sendChallenge(player.username));
+            challengeActions.appendChild(challengeBtn);
+            break;
+    }
+}
+
+function createButton(text, className, onClick) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.classList.add(className);
+    button.onclick = onClick;
+    return button;
 }
 
 async function sendChallenge(username) {
@@ -169,7 +274,6 @@ async function sendChallenge(username) {
         const data = await response.json();
 
         if (data.success) {
-            statusLabel.textContent = `Desafío enviado a ${username}. Esperando respuesta...`;
             await loadPlayers();
         } else {
             alert(data.message || 'Error al enviar desafío');
@@ -190,7 +294,6 @@ async function acceptChallenge(challengeId) {
         const data = await response.json();
 
         if (data.success) {
-            statusLabel.textContent = 'Desafío aceptado. Esperando al host para iniciar...';
             await loadPlayers();
         } else {
             alert(data.message || 'Error al aceptar desafío');
@@ -198,6 +301,58 @@ async function acceptChallenge(challengeId) {
     } catch (error) {
         console.error('Error accepting challenge:', error);
         alert('Error al aceptar desafío');
+    }
+}
+
+async function rejectChallenge(challengeId) {
+    try {
+        const response = await fetch(`/api/challenge/reject/${challengeId}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await loadPlayers();
+            // Clear selection after rejection
+            selectedPlayer = null;
+            challengeDetails.style.display = "none";
+            renderPlayerList();
+        } else {
+            alert(data.message || 'Error al rechazar desafío');
+        }
+    } catch (error) {
+        console.error('Error rejecting challenge:', error);
+        alert('Error al rechazar desafío');
+    }
+}
+
+async function cancelChallenge(challengeId) {
+    if (!confirm('¿Estás seguro de que quieres cancelar este desafío?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/challenge/cancel/${challengeId}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await loadPlayers();
+            // Clear selection after cancellation
+            selectedPlayer = null;
+            challengeDetails.style.display = "none";
+            renderPlayerList();
+        } else {
+            alert(data.message || 'Error al cancelar desafío');
+        }
+    } catch (error) {
+        console.error('Error cancelling challenge:', error);
+        alert('Error al cancelar desafío');
     }
 }
 
@@ -229,7 +384,6 @@ function goToMatch(challengeId) {
     if (refreshInterval) {
         clearInterval(refreshInterval);
     }
-    // TODO: Pass challengeId to game page
     window.location.href = `/game?challengeId=${challengeId}`;
 }
 

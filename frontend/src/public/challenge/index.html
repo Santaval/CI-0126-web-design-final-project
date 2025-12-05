@@ -17,12 +17,19 @@
     <main class="challenge-container">
         <section class="left-section">
             <div class="player-card">
-                <img src="/img/avatarph.png" alt="Player Avatar" class="avatar" />
+                <img src="/img/avatarph.png" alt="Player Avatar" class="avatar" id="current-user-avatar" />
                 <p class="username" id="current-user">You</p>
             </div>
 
-            <div class="challenge-status" id="challenge-status">
-                <p class="status-text">Elige un contrincante</p>
+            <div class="challenge-details" id="challenge-details" style="display: none;">
+                <div class="selected-player-info">
+                    <img src="/img/avatarph.png" alt="Selected Player" class="avatar" id="selected-avatar" />
+                    <p class="username" id="selected-username"></p>
+                </div>
+                <div class="challenge-status" id="challenge-status">
+                    <p class="status-text">Selecciona un jugador</p>
+                </div>
+                <div class="challenge-actions" id="challenge-actions"></div>
             </div>
         </section>
 
@@ -34,6 +41,5 @@
     </main>
 
     <script type="module" src="./main.js"></script>
-    <script type="module" src="/components/navbar/navbar.js" defer></script>
 </body>
 </html>

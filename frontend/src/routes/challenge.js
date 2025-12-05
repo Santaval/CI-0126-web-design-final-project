@@ -369,7 +369,7 @@ router.get('/:challengeId', requireAuth, async (req, res) => {
 router.post('/finish/:challengeId', requireAuth, async (req, res) => {
   try {
     const { challengeId } = req.params;
-    const { winnerId, matchData } = req.body;
+    const { winnerId, loserId,matchData } = req.body;
     const userId = req.user._id;
 
     const challenge = await Challenge.findById(challengeId);
@@ -401,6 +401,7 @@ router.post('/finish/:challengeId', requireAuth, async (req, res) => {
 
     challenge.status = 'finished';
     challenge.winner = winnerId || null;
+    challenge.loser = loserId || null;
     challenge.matchData = matchData || null;
     challenge.updatedAt = new Date();
     await challenge.save();
@@ -411,7 +412,8 @@ router.post('/finish/:challengeId', requireAuth, async (req, res) => {
       challenge: {
         id: challenge._id,
         status: challenge.status,
-        winner: challenge.winner
+        winner: challenge.winner,
+        loser: challenge.loser,
       }
     });
 
@@ -424,4 +426,51 @@ router.post('/finish/:challengeId', requireAuth, async (req, res) => {
   }
 });
 
+// Cancel a challenge (only challenger can cancel)
+router.post('/cancel/:challengeId', requireAuth, async (req, res) => {
+  try {
+    const { challengeId } = req.params;
+    const userId = req.user._id;
+    const challenge = await Challenge.findById(challengeId);
+    if (!challenge) {
+      return res.status(404).json({
+        success: false,
+        message: 'Challenge not found'
+      });
+    }
+    // Verify user is the challenger
+    if (challenge.challenger.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the challenger can cancel the challenge'
+      });
+    }
+    // Can only cancel if pending, accepted, or in_progress
+    if (!['pending', 'accepted', 'in_progress'].includes(challenge.status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Challenge cannot be cancelled in current status'
+      });
+    }
+    challenge.status = 'cancelled';
+    challenge.winner = null;
+    challenge.loser = null;
+    challenge.updatedAt = new Date();
+    await challenge.save();
+    res.json({
+      success: true,
+      message: 'Challenge cancelled successfully',
+      challenge: {
+        id: challenge._id,
+        status: challenge.status
+      }
+    });
+  } catch (error) {
+    console.error('Cancel challenge error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error cancelling challenge'
+    });
+  }
+});
 module.exports = router;
