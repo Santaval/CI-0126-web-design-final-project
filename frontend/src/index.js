@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const MongoStore = require('connect-mongo').default;
+const mongoose = require('mongoose');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
@@ -21,11 +23,20 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Session configuration
+// Session configuration with MongoDB store
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        client: mongoose.connection.getClient(),
+        collectionName: 'sessions',
+        ttl: 24 * 60 * 60, // Session TTL (time to live) in seconds (24 hours)
+        touchAfter: 24 * 3600, // Lazy session update (24 hours)
+        crypto: {
+            secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production'
+        }
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
         httpOnly: true,
