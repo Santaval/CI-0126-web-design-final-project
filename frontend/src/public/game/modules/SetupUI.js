@@ -284,6 +284,19 @@ export class SetupUI {
     }
 
     startGame() {
+        console.log('SetupUI.startGame() called');
+        console.log('Placed ships:', this.placedShips);
+        console.log('Window handler exists:', !!window.handleStartMultiplayerGame);
+        
+        // Check if there's a custom multiplayer handler
+        if (window.handleStartMultiplayerGame) {
+            console.log('Calling multiplayer handler');
+            window.handleStartMultiplayerGame();
+            return;
+        }
+        
+        console.log('Using fallback local game');
+        // Fallback to local game (shouldn't happen in multiplayer mode)
         const shipPlacements = this.getShipPlacements();
         
         this.gameManager.placePlayerShips(shipPlacements);

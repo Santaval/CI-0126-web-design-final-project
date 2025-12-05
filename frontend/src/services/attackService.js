@@ -17,7 +17,7 @@ const SHIP_SIZES = {
 class AttackService {
     /**
      * Process an attack on opponent's board
-     * @param {string} gameId - Game ID
+     * @param {string} gameId - Game ID or Game Code
      * @param {string} playerId - Player ID making the attack
      * @param {Object} target - Target coordinates {row, col}
      * @returns {Object} Attack result
@@ -37,15 +37,24 @@ class AttackService {
             throw new Error('Target must be within 10x10 board (0-9)');
         }
 
-        // Find the game
-        const game = await Game.findById(gameId);
+        // Convert playerId to string if it's an ObjectId
+        const playerIdStr = playerId.toString();
+
+        // Find the game - try by gameCode first, then by _id
+        let game;
+        
+        if (gameId.match(/^[0-9a-fA-F]{24}$/)) {
+            game = await Game.findById(gameId);
+        } else {
+            game = await Game.findOne({ gameCode: gameId.toUpperCase() });
+        }
 
         if (!game) {
             throw new Error('Game not found');
         }
 
         // Verify player is in the game
-        const player = game.getPlayer(null, playerId);
+        const player = game.getPlayer(playerIdStr);
         if (!player) {
             throw new Error('Player not found in this game');
         }

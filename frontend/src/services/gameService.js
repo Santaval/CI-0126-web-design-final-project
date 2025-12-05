@@ -100,8 +100,8 @@ class GameService {
 
         await game.save();
 
-        // Get opponent (player 1) name
-        const opponent = game.getPlayer(1);
+        // Get opponent (player 1) info
+        const opponent = game.players.find(p => p.playerNumber === 1);
 
         console.log(`Player (${playerId}) joined game ${gameCode}`);
 
@@ -116,7 +116,7 @@ class GameService {
 
     /**
      * Place ships on the board
-     * @param {string} gameId - Game ID
+     * @param {string} gameId - Game ID or Game Code
      * @param {string} playerId - Player ID
      * @param {Array} ships - Array of ship placements
      * @returns {Object} Placement result with ready status
@@ -130,15 +130,24 @@ class GameService {
             throw new Error('Ships array is required');
         }
 
-        // Find the game
-        const game = await Game.findById(gameId);
+        // Convert playerId to string if it's an ObjectId
+        const playerIdStr = playerId.toString();
+
+        // Find the game - try by gameCode first, then by _id
+        let game;
+        
+        if (gameId.match(/^[0-9a-fA-F]{24}$/)) {
+            game = await Game.findById(gameId);
+        } else {
+            game = await Game.findOne({ gameCode: gameId.toUpperCase() });
+        }
 
         if (!game) {
             throw new Error('Game not found');
         }
 
         // Verify player is in the game
-        const player = game.getPlayer(null, playerId);
+        const player = game.getPlayer(playerIdStr);
         if (!player) {
             throw new Error('Player not found in this game');
         }
@@ -231,7 +240,7 @@ class GameService {
 
     /**
      * Get current game state
-     * @param {string} gameId - Game ID
+     * @param {string} gameId - Game ID or Game Code
      * @param {string} playerId - Player ID
      * @returns {Object} Current game state
      */
@@ -240,16 +249,29 @@ class GameService {
             throw new Error('Game ID and Player ID are required');
         }
 
-        // Find the game
-        const game = await Game.findById(gameId);
+        // Convert playerId to string if it's an ObjectId
+        const playerIdStr = playerId.toString();
+
+        // Find the game - try by gameCode first, then by _id
+        let game;
+        
+        // Check if it's a valid ObjectId (24 hex characters)
+        if (gameId.match(/^[0-9a-fA-F]{24}$/)) {
+            game = await Game.findById(gameId);
+        } else {
+            // Assume it's a gameCode
+            game = await Game.findOne({ gameCode: gameId.toUpperCase() });
+        }
 
         if (!game) {
             throw new Error('Game not found');
         }
 
         // Verify player is in the game
-        const player = game.getPlayer(null, playerId);
+        console.log('Fetching game state for game:', game.gameCode, 'playerId:', playerIdStr);
+        const player = game.getPlayer(playerIdStr);
         if (!player) {
+            console.log('Available players:', game.players.map(p => ({ id: p.playerId, num: p.playerNumber })));
             throw new Error('Player not found in this game');
         }
 
@@ -259,7 +281,7 @@ class GameService {
         await game.save();
 
         // Get opponent info
-        const opponent = game.getOpponent(playerId);
+        const opponent = game.getOpponent(playerIdStr);
         const opponentJoined = !!opponent;
         const opponentReady = opponent ? opponent.ready : false;
         const opponentName = opponent ? opponent.playerName : null;

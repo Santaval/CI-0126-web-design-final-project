@@ -13,15 +13,13 @@ let setupUI;
 let multiplayerManager;
 
 // Screen elements
-let lobbyScreen;
-let waitingScreen;
 let setupScreen;
 let gameScreen;
 
 // =============================================
 // INITIALIZATION
 // =============================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('Battleship Multiplayer Game Loaded');
     
     // Initialize components
@@ -33,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupUI = new SetupUI(gameManager);
     
     // Get screen elements
-    lobbyScreen = document.getElementById('lobby-screen');
-    waitingScreen = document.getElementById('waiting-screen');
     setupScreen = document.getElementById('setup-screen');
     gameScreen = document.getElementById('game-screen');
     
@@ -45,126 +41,115 @@ document.addEventListener('DOMContentLoaded', () => {
     window.multiplayerManager = multiplayerManager;
     window.GameConstants = GameConstants;
     
-    // Initialize lobby UI
-    initializeLobby();
+    // Get challengeId from URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const challengeId = urlParams.get('challengeId');
     
-    // Show lobby screen
-    showScreen('lobby');
+    if (!challengeId) {
+        alert('No se encontró el código de desafío. Por favor, accede a través de un enlace válido.');
+        return;
+    }
     
-    console.log('Ready to create or join a game!');
+    // Initialize game session
+    try {
+        console.log(`Loading game with challenge ID: ${challengeId}`);
+        
+        // Get user data
+        const userData = await getUserData();
+        if (!userData) {
+            alert('No se pudo obtener la información del usuario. Por favor, inicia sesión nuevamente.');
+            window.location.href = '/auth/login';
+            return;
+        }
+        
+        // Fetch challenge details to get gameCode
+        const challengeData = await fetchChallengeDetails(challengeId);
+        
+        if (!challengeData || !challengeData.gameCode) {
+            alert('No se pudo cargar la información del desafío.');
+            return;
+        }
+        
+        // Initialize multiplayer manager with existing game session
+        multiplayerManager.initializeFromChallenge(
+            challengeData.gameCode,
+            userData.id,
+            userData.username
+        );
+        
+        // Start polling for game state
+        multiplayerManager.startPolling(handleGameStateUpdate);
+        
+        // Show setup screen initially
+        showScreen('setup');
+        
+        console.log('Game session initialized successfully!');
+    } catch (error) {
+        console.error('Error initializing game:', error);
+        alert('Error al cargar el juego: ' + error.message);
+    }
 });
 
-// =============================================
-// LOBBY FUNCTIONS
-// =============================================
-function initializeLobby() {
-    // Create game button
-    document.getElementById('create-game-btn').addEventListener('click', handleCreateGame);
-    
-    // Join game button
-    document.getElementById('join-game-btn').addEventListener('click', handleJoinGame);
-    
-    // Enter key handlers
-    document.getElementById('create-player-name').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleCreateGame();
-    });
-    
-    document.getElementById('join-game-code').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleJoinGame();
-    });
-    
-    // Cancel waiting button
-    document.getElementById('cancel-waiting-btn').addEventListener('click', handleCancelWaiting);
-    
-    // Copy code button
-    document.getElementById('copy-code-btn').addEventListener('click', handleCopyCode);
-}
-
-async function handleCreateGame() {
-    const playerName = document.getElementById('create-player-name').value.trim();
-    
-    if (!playerName) {
-        showLobbyMessage('Por favor ingresa tu nombre', 'error');
-        return;
+// Helper function to get user data
+async function getUserData() {
+    // Try to get from localStorage first
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+        try {
+            const user = JSON.parse(storedUser);
+            if (user.id || user._id) {
+                return {
+                    id: user.id || user._id,
+                    username: user.username || user.name || 'Jugador'
+                };
+            }
+        } catch (e) {
+            console.error('Error parsing stored user data:', e);
+        }
     }
     
+    // Try to fetch from API
     try {
-        showLobbyMessage('Creando sala...', 'info');
-        
-        const response = await multiplayerManager.createGame(playerName);
-        
-        // Show waiting screen
-        document.getElementById('display-game-code').textContent = response.gameCode;
-        showScreen('waiting');
-        
-        // Start polling for opponent
-        multiplayerManager.startPolling(handleGameStateUpdate);
-        
+        const response = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.user) {
+                // Store for future use
+                localStorage.setItem('user', JSON.stringify(data.user));
+                return {
+                    id: data.user._id || data.user.id,
+                    username: data.user.username || 'Jugador'
+                };
+            }
+        }
     } catch (error) {
-        showLobbyMessage('Error al crear la sala: ' + error.message, 'error');
+        console.error('Error fetching user data:', error);
     }
+    
+    return null;
 }
 
-async function handleJoinGame() {
-    const playerName = document.getElementById('join-player-name').value.trim();
-    const gameCode = document.getElementById('join-game-code').value.trim().toUpperCase();
-    
-    if (!playerName) {
-        showLobbyMessage('Por favor ingresa tu nombre', 'error');
-        return;
-    }
-    
-    if (!gameCode) {
-        showLobbyMessage('Por favor ingresa el código de sala', 'error');
-        return;
-    }
-    
+// Helper function to fetch challenge details
+async function fetchChallengeDetails(challengeId) {
     try {
-        showLobbyMessage('Uniéndose a la sala...', 'info');
+        const response = await fetch(`/api/challenge/${challengeId}`, {
+            credentials: 'include'
+        });
         
-        const response = await multiplayerManager.joinGame(gameCode, playerName);
+        if (!response.ok) {
+            throw new Error('No se pudo obtener los detalles del desafío');
+        }
         
-        // Initialize game
-        gameManager.startGame(playerName, response.opponentName);
-        
-        // Show setup screen
-        showScreen('setup');
-        setupUI.initializeShipSetup();
-        
-        // Update opponent info
-        document.getElementById('opponent-name').textContent = response.opponentName;
-        
-        // Start polling
-        multiplayerManager.startPolling(handleGameStateUpdate);
-        
+        const data = await response.json();
+        return data.challenge;
     } catch (error) {
-        showLobbyMessage('Error al unirse: ' + error.message, 'error');
+        console.error('Error fetching challenge details:', error);
+        throw error;
     }
 }
 
-function handleCancelWaiting() {
-    multiplayerManager.reset();
-    showScreen('lobby');
-    showLobbyMessage('', '');
-}
-
-function handleCopyCode() {
-    const code = document.getElementById('display-game-code').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        const btn = document.getElementById('copy-code-btn');
-        const originalText = btn.textContent;
-        btn.textContent = '✓ Copiado!';
-        setTimeout(() => {
-            btn.textContent = originalText;
-        }, 2000);
-    });
-}
-
-function showLobbyMessage(message, type) {
-    const messageEl = document.getElementById('lobby-message');
-    messageEl.textContent = message;
-    messageEl.className = 'lobby-message ' + type;
-}
 
 // =============================================
 // GAME STATE MANAGEMENT
@@ -175,39 +160,33 @@ function handleGameStateUpdate(state) {
     // Update opponent name if available
     if (state.opponentName) {
         multiplayerManager.opponentName = state.opponentName;
-        document.getElementById('opponent-name').textContent = state.opponentName;
-        document.getElementById('opponent-player-name').textContent = state.opponentName;
+        const opponentNameEl = document.getElementById('opponent-name');
+        const opponentPlayerNameEl = document.getElementById('opponent-player-name');
+        if (opponentNameEl) opponentNameEl.textContent = state.opponentName;
+        if (opponentPlayerNameEl) opponentPlayerNameEl.textContent = state.opponentName;
     }
     
-    // Handle waiting for opponent
-    if (state.gameStatus === 'waiting' && multiplayerManager.isWaitingForOpponent) {
-        // Still waiting...
-        return;
-    }
-    
-    // Opponent joined - transition to setup
-    if (state.gameStatus === 'setup' && multiplayerManager.isWaitingForOpponent) {
-        multiplayerManager.isWaitingForOpponent = false;
-        
+    // Handle game setup - initialize game if needed
+    if (state.gameStatus === 'setup' && !gameManager.currentGame) {
         // Initialize game
-        gameManager.startGame(multiplayerManager.playerName, state.opponentName);
+        gameManager.startGame(multiplayerManager.playerName, state.opponentName || 'Oponente');
         
-        // Show setup screen
+        // Show setup screen and initialize ship setup
         showScreen('setup');
         setupUI.initializeShipSetup();
-        
-        return;
     }
     
     // Update opponent ready status during setup
     if (state.gameStatus === 'setup') {
         const readyBadge = document.getElementById('opponent-ready-status');
-        if (state.opponentReady) {
-            readyBadge.textContent = '✓ Listo';
-            readyBadge.className = 'status-badge ready';
-        } else {
-            readyBadge.textContent = '⏳ No listo';
-            readyBadge.className = 'status-badge not-ready';
+        if (readyBadge) {
+            if (state.opponentReady) {
+                readyBadge.textContent = '✓ Listo';
+                readyBadge.className = 'status-badge ready';
+            } else {
+                readyBadge.textContent = '⏳ No listo';
+                readyBadge.className = 'status-badge not-ready';
+            }
         }
     }
     
@@ -227,28 +206,31 @@ function handleGameStateUpdate(state) {
         
         // Update turn indicator
         const statusEl = document.getElementById('player-status');
-        if (state.isYourTurn) {
-            statusEl.textContent = '⚔️ Tu turno - ¡Ataca!';
-            statusEl.className = 'status-indicator your-turn';
-        } else {
-            statusEl.textContent = '⏳ Turno del oponente';
-            statusEl.className = 'status-indicator opponent-turn';
+        if (statusEl) {
+            if (state.isYourTurn) {
+                statusEl.textContent = '⚔️ Tu turno - ¡Ataca!';
+                statusEl.className = 'status-indicator your-turn';
+            } else {
+                statusEl.textContent = '⏳ Turno del oponente';
+                statusEl.className = 'status-indicator opponent-turn';
+            }
         }
         
         // Update statistics
         if (state.statistics) {
-            document.getElementById('ships-sunk').textContent = 
-                `${state.statistics.yourSunkShips.length}/5`;
-            document.getElementById('opponent-ships-remaining').textContent = 
-                5 - state.statistics.yourSunkShips.length;
-            document.getElementById('player-ships-remaining').textContent = 
-                5 - state.statistics.opponentSunkShips.length;
-            document.getElementById('player-hits-given').textContent = 
-                state.statistics.yourHits;
-            document.getElementById('player-hits-taken').textContent = 
-                state.statistics.opponentHits;
-            document.getElementById('attempts-count').textContent = 
-                state.statistics.yourTotalShots;
+            const shipsSunkEl = document.getElementById('ships-sunk');
+            const oppShipsRemainingEl = document.getElementById('opponent-ships-remaining');
+            const playerShipsRemainingEl = document.getElementById('player-ships-remaining');
+            const hitsGivenEl = document.getElementById('player-hits-given');
+            const hitsTakenEl = document.getElementById('player-hits-taken');
+            const attemptsEl = document.getElementById('attempts-count');
+            
+            if (shipsSunkEl) shipsSunkEl.textContent = `${state.statistics.yourSunkShips.length}/5`;
+            if (oppShipsRemainingEl) oppShipsRemainingEl.textContent = 5 - state.statistics.yourSunkShips.length;
+            if (playerShipsRemainingEl) playerShipsRemainingEl.textContent = 5 - state.statistics.opponentSunkShips.length;
+            if (hitsGivenEl) hitsGivenEl.textContent = state.statistics.yourHits;
+            if (hitsTakenEl) hitsTakenEl.textContent = state.statistics.opponentHits;
+            if (attemptsEl) attemptsEl.textContent = state.statistics.yourTotalShots;
         }
         
         // Render boards
@@ -265,22 +247,10 @@ function handleGameStateUpdate(state) {
 // =============================================
 // SETUP FUNCTIONS
 // =============================================
-// Override the start game button to handle multiplayer
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        const startBtn = document.getElementById('start-game-btn');
-        if (startBtn) {
-            // Remove old listeners by cloning
-            const newBtn = startBtn.cloneNode(true);
-            startBtn.parentNode.replaceChild(newBtn, startBtn);
-            
-            newBtn.addEventListener('click', handleStartMultiplayerGame);
-        }
-    }, 100);
-});
-
 async function handleStartMultiplayerGame() {
     const placedShips = setupUI.placedShips;
+    
+    console.log('Attempting to start game with ships:', placedShips);
     
     if (placedShips.length !== 5) {
         alert('Debes colocar todos los barcos primero');
@@ -288,11 +258,18 @@ async function handleStartMultiplayerGame() {
     }
     
     try {
+        console.log('Placing ships in local game...');
         // Place ships in local game
         gameManager.placePlayerShips(placedShips);
         
+        console.log('Sending ships to API...');
+        console.log('GameId:', multiplayerManager.gameId);
+        console.log('PlayerId:', multiplayerManager.playerId);
+        
         // Send ships to API
         await multiplayerManager.placeShips(placedShips);
+        
+        console.log('Ships placed successfully!');
         
         // Show waiting message
         gameUI.showMessage('Barcos colocados. Esperando al oponente...', 'info');
@@ -310,18 +287,10 @@ async function handleStartMultiplayerGame() {
 // UTILITY FUNCTIONS
 // =============================================
 function showScreen(screenName) {
-    lobbyScreen.style.display = 'none';
-    waitingScreen.style.display = 'none';
     setupScreen.style.display = 'none';
     gameScreen.style.display = 'none';
     
     switch(screenName) {
-        case 'lobby':
-            lobbyScreen.style.display = 'block';
-            break;
-        case 'waiting':
-            waitingScreen.style.display = 'block';
-            break;
         case 'setup':
             setupScreen.style.display = 'block';
             break;
@@ -332,13 +301,12 @@ function showScreen(screenName) {
 }
 
 function getCurrentScreen() {
-    if (lobbyScreen.style.display !== 'none') return 'lobby';
-    if (waitingScreen.style.display !== 'none') return 'waiting';
-    if (setupScreen.style.display !== 'none') return 'setup';
-    if (gameScreen.style.display !== 'none') return 'game';
+    if (setupScreen && setupScreen.style.display !== 'none') return 'setup';
+    if (gameScreen && gameScreen.style.display !== 'none') return 'game';
     return null;
 }
 
 // Export for global access
 window.showScreen = showScreen;
 window.handleGameStateUpdate = handleGameStateUpdate;
+window.handleStartMultiplayerGame = handleStartMultiplayerGame;

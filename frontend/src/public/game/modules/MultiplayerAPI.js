@@ -100,7 +100,7 @@ export class MultiplayerAPI {
 
     async getGameState(gameId, playerId) {
         try {
-            const response = await fetch(`${this.baseURL}/state/${gameId}/${playerId}`);
+            const response = await fetch(`${this.baseURL}/state/${gameId}`);
 
             const data = await response.json();
             

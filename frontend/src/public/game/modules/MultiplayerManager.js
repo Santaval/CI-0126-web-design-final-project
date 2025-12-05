@@ -26,6 +26,20 @@ export class MultiplayerManager {
         this.isGameActive = false;
     }
 
+    /**
+     * Initialize game session from existing challenge
+     * Used when user already joined via challenge system
+     */
+    initializeFromChallenge(gameCode, playerId, playerName) {
+        this.gameCode = gameCode;
+        this.gameId = gameCode; // Use gameCode as gameId
+        this.playerId = playerId;
+        this.playerName = playerName;
+        this.isWaitingForOpponent = false;
+        
+        console.log(`Initialized game session - GameCode: ${gameCode}, PlayerId: ${playerId}`);
+    }
+
     async createGame(playerName) {
         try {
             const response = await this.api.createGame(playerName);
@@ -65,15 +79,19 @@ export class MultiplayerManager {
 
     async placeShips(ships) {
         try {
+            console.log('Raw ships received:', ships);
+            
             // Convert ships to API format
             const formattedShips = ships.map(ship => ({
-                type: ship.type,
+                type: ship.id,  // Use 'id' instead of 'type'
                 position: {
-                    row: ship.row,
-                    col: ship.col
+                    row: ship.positions[0].row,  // First position is the ship's starting point
+                    col: ship.positions[0].col
                 },
                 orientation: ship.orientation
             }));
+
+            console.log('Formatted ships:', formattedShips);
 
             const response = await this.api.placeShips(
                 this.gameId,

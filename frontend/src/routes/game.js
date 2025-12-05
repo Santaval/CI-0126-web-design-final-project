@@ -3,6 +3,17 @@ const router = express.Router();
 const gameService = require('../services/gameService');
 const attackService = require('../services/attackService');
 
+const requireAuth = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+  }
+  next();
+};
+
+
 /**
  * POST /api/game/create
  * Create a new game room
@@ -112,9 +123,10 @@ router.post('/attack', async (req, res) => {
  * GET /api/game/state/:gameId/:playerId
  * Get current game state for polling
  */
-router.get('/state/:gameId/:playerId', async (req, res) => {
+router.get('/state/:gameId', requireAuth, async (req, res) => {
     try {
-        const { gameId, playerId } = req.params;
+        const { gameId } = req.params;
+        const playerId = req.user._id;
         const state = await gameService.getGameState(gameId, playerId);
         
         return res.status(200).json({
