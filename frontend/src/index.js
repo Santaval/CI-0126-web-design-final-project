@@ -1,13 +1,19 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
+const connectDB = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+
+// Connect to MongoDB
+connectDB();
 
 app.use(morgan('dev'));
 

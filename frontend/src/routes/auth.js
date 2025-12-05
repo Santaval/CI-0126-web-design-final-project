@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const { passport, findUserByUsername, readUsers, writeUsers } = require('../config/passport');
+const User = require('../models/User');
+const { passport } = require('../config/passport');
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -17,31 +17,36 @@ router.post('/register', async (req, res) => {
         }
 
         // Check if user already exists
-        const existingUser = await findUserByUsername(username);
+        const existingUser = await User.findOne({ 
+            $or: [
+                { username: username.toLowerCase() },
+                { email: email.toLowerCase() }
+            ]
+        });
+
         if (existingUser) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Username already exists' 
-            });
+            if (existingUser.username === username.toLowerCase()) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Username already exists' 
+                });
+            } else {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Email already exists' 
+                });
+            }
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // Create new user (password will be hashed by the pre-save hook)
+        const newUser = new User({
+            username: username.toLowerCase(),
+            email: email.toLowerCase(),
+            password,
+            imageUrl: profileImageUrl || '/img/default-profile.png'
+        });
 
-        // Create new user
-        const users = await readUsers();
-        const newUser = {
-            id: Date.now(),
-            username,
-            password: hashedPassword,
-            email,
-            imageUrl: profileImageUrl || '/img/default-profile.png',
-            createdAt: new Date().toISOString()
-        };
-
-        users.push(newUser);
-        await writeUsers(users);
+        await newUser.save();
 
         // Auto-login after registration
         req.login(newUser, (err) => {
@@ -52,19 +57,35 @@ router.post('/register', async (req, res) => {
                 });
             }
 
-            // Don't send password back
-            const userResponse = { ...newUser };
-            delete userResponse.password;
-
+            // Use the toJSON method to exclude password
             res.status(201).json({ 
                 success: true, 
                 message: 'User registered successfully',
-                user: userResponse
+                user: newUser.toJSON()
             });
         });
 
     } catch (error) {
         console.error('Registration error:', error);
+        
+        // Handle Mongoose validation errors
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ 
+                success: false, 
+                message: messages.join(', ')
+            });
+        }
+
+        // Handle duplicate key errors
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(400).json({ 
+                success: false, 
+                message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` 
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
             message: 'Server error during registration' 
@@ -97,14 +118,11 @@ router.post('/login', (req, res, next) => {
                 });
             }
 
-            // Don't send password back
-            const userResponse = { ...user };
-            delete userResponse.password;
-
+            // Use the toJSON method to exclude password
             res.json({ 
                 success: true, 
                 message: 'Logged in successfully',
-                user: userResponse
+                user: user.toJSON()
             });
         });
     })(req, res, next);
@@ -129,12 +147,9 @@ router.post('/logout', (req, res) => {
 // Get current user
 router.get('/user', (req, res) => {
     if (req.isAuthenticated()) {
-        const userResponse = { ...req.user };
-        delete userResponse.password;
-        
         res.json({ 
             success: true, 
-            user: userResponse 
+            user: req.user.toJSON()
         });
     } else {
         res.status(401).json({ 
@@ -155,32 +170,41 @@ router.put('/user', async (req, res) => {
 
     try {
         const { email, imageUrl } = req.body;
-        const users = await readUsers();
         
-        const userIndex = users.findIndex(u => u.id === req.user.id);
-        if (userIndex === -1) {
+        const updateData = {};
+        if (email) updateData.email = email.toLowerCase();
+        if (imageUrl) updateData.imageUrl = imageUrl;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'User not found' 
             });
         }
 
-        // Update user data
-        if (email) users[userIndex].email = email;
-        if (imageUrl) users[userIndex].imageUrl = imageUrl;
-
-        await writeUsers(users);
-
-        const updatedUser = { ...users[userIndex] };
-        delete updatedUser.password;
-
         res.json({ 
             success: true, 
             message: 'User updated successfully',
-            user: updatedUser 
+            user: updatedUser.toJSON()
         });
     } catch (error) {
         console.error('Update error:', error);
+        
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({ 
+                success: false, 
+                message: messages.join(', ')
+            });
+        }
+
         res.status(500).json({ 
             success: false, 
             message: 'Server error during update' 
