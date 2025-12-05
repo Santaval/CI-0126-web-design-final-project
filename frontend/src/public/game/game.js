@@ -290,6 +290,11 @@ function handleGameStateUpdate(state) {
             gameManager.updateOpponentMoves(state.opponentMoves);
         }
         
+        // Update your moves on attack board (opponent board)
+        if (state.yourMoves && state.yourMoves.length > 0) {
+            gameManager.updateYourMoves(state.yourMoves);
+        }
+        
         // Update turn indicator
         const statusEl = document.getElementById('player-status');
         if (statusEl) {

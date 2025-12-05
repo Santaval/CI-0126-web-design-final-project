@@ -120,6 +120,33 @@ export class GameManager {
         }
     }
 
+    updateYourMoves(yourMoves) {
+        if (!this.currentGame) return;
+
+        const attackBoard = this.currentGame.players[0].attackBoard;
+        
+        // Clear existing hits and misses
+        attackBoard.hits = [];
+        attackBoard.misses = [];
+        
+        // Add all your moves to the attack board
+        for (const move of yourMoves) {
+            if (move.result === 'hit' || move.result === 'sunk') {
+                attackBoard.hits.push({
+                    row: move.row,
+                    col: move.col
+                });
+                attackBoard.grid[move.row][move.col] = 'hit';
+            } else if (move.result === 'miss') {
+                attackBoard.misses.push({
+                    row: move.row,
+                    col: move.col
+                });
+                attackBoard.grid[move.row][move.col] = 'miss';
+            }
+        }
+    }
+
     restartGame() {
         this.currentGame = null;
     }
