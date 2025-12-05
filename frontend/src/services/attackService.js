@@ -69,9 +69,11 @@ class AttackService {
             throw new Error('Not your turn');
         }
 
-        // Check if this cell was already attacked
+        // Check if this cell was already attacked by this player
         const alreadyAttacked = game.moves.some(
-            move => move.row === target.row && move.col === target.col
+            move => move.playerNumber === player.playerNumber && 
+                    move.row === target.row && 
+                    move.col === target.col
         );
 
         if (alreadyAttacked) {
