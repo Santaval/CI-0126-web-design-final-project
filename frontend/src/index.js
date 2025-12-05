@@ -1,4 +1,11 @@
+require('dotenv').config();
+
 const express = require('express');
+const session = require('express-session');
+const { passport } = require('./config/passport');
+const authRoutes = require('./routes/auth');
+const connectDB = require('./config/database');
+
 const app = express();
 const PORT = 3000;
 
