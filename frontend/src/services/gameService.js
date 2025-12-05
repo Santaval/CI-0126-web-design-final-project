@@ -411,7 +411,7 @@ class GameService {
             // Game end info
             gameOver: game.status === 'finished',
             winner: game.winner || null,
-            youWon: game.winner === player.playerNumber,
+            youWon: game.winner ? game.winner === playerIdStr : false,
             
             // Timestamps
             gameCreatedAt: game.createdAt,

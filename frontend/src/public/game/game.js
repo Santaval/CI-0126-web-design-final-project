@@ -342,8 +342,33 @@ function handleGameStateUpdate(state) {
     
     // Game over
     if (state.gameStatus === 'finished' || state.gameOver) {
+        console.log('Game finished!', {
+            gameStatus: state.gameStatus,
+            gameOver: state.gameOver,
+            youWon: state.youWon,
+            winner: state.winner
+        });
+        
         multiplayerManager.stopPolling();
         gameUI.showGameOver(state.youWon);
+        
+        // Update game status display
+        const gameStatusEl = document.getElementById('game-status');
+        if (gameStatusEl) {
+            gameStatusEl.textContent = state.youWon ? '¡Victoria!' : 'Derrota';
+        }
+        
+        // Update player status
+        const statusEl = document.getElementById('player-status');
+        if (statusEl) {
+            if (state.youWon) {
+                statusEl.textContent = '🏆 ¡Has ganado!';
+                statusEl.className = 'status-indicator victory';
+            } else {
+                statusEl.textContent = '💀 Has perdido';
+                statusEl.className = 'status-indicator defeat';
+            }
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 const Game = require('../models/Game');
+const Challenge = require('../models/Challenge');
 
 /**
  * Ship sizes configuration
@@ -106,12 +107,16 @@ class AttackService {
         game.moves.push(move);
         game.turnCounter += 1;
 
-        // Check if game is over
-        const gameOverResult = this.checkGameOver(opponentShips, game.moves);
+        // Check if game is over - only check this player's moves against opponent's ships
+        const playerMoves = game.moves.filter(m => m.playerNumber === player.playerNumber);
+        const gameOverResult = this.checkGameOver(opponentShips, playerMoves);
         
         if (gameOverResult.gameOver) {
             game.status = 'finished';
-            game.winner = player.playerNumber;
+            game.winner = player.playerId;
+            
+            // Update the associated challenge
+            await this.updateChallengeOnGameEnd(game.gameCode, player.playerId);
         } else {
             // Switch turns
             game.currentTurn = player.playerNumber === 1 ? 2 : 1;
@@ -215,24 +220,71 @@ class AttackService {
     checkGameOver(opponentShips, moves) {
         const sunkShips = new Set();
         
+        console.log('Checking game over with', moves.length, 'player moves and', opponentShips.length, 'opponent ships');
+        
         for (const ship of opponentShips) {
-            const shipSize = SHIP_SIZES[ship.type];
-            const shipCells = this.getShipCells(ship, shipSize);
+            const shipType = ship.shipId || ship.type;
+            const shipSize = SHIP_SIZES[shipType];
+            
+            // Use positions array if available, otherwise calculate from position
+            const shipCells = ship.positions || this.getShipCells(ship, shipSize);
 
             const shipHits = moves.filter(move => {
                 return shipCells.some(cell => cell.row === move.row && cell.col === move.col);
             });
 
+            console.log(`Ship ${shipType}: ${shipHits.length}/${shipSize} hits`);
+
             if (shipHits.length === shipSize) {
-                sunkShips.add(ship.type);
+                sunkShips.add(shipType);
+                console.log(`Ship ${shipType} is SUNK!`);
             }
         }
 
+        const gameOver = sunkShips.size === 5;
+        console.log(`Game over check: ${sunkShips.size}/5 ships sunk. Game over: ${gameOver}`);
+
         // If all 5 ships are sunk, game is over
         return {
-            gameOver: sunkShips.size === 5,
+            gameOver: gameOver,
             sunkShipsCount: sunkShips.size
         };
+    }
+
+    /**
+     * Update the challenge when game ends
+     * @param {string} gameCode - Game code
+     * @param {string} winnerPlayerId - Winner's player ID
+     */
+    async updateChallengeOnGameEnd(gameCode, winnerPlayerId) {
+        try {
+            // Find the challenge with this game code
+            const challenge = await Challenge.findOne({ gameCode });
+            
+            if (!challenge) {
+                console.warn(`No challenge found for game code ${gameCode}`);
+                return;
+            }
+
+            // Determine winner and loser based on playerId
+            const winnerId = winnerPlayerId;
+            const loserId = challenge.challenger.toString() === winnerId 
+                ? challenge.challenged 
+                : challenge.challenger;
+
+            // Update challenge status
+            challenge.status = 'finished';
+            challenge.winner = winnerId;
+            challenge.loser = loserId;
+            challenge.updatedAt = new Date();
+
+            await challenge.save();
+
+            console.log(`Challenge ${challenge._id} updated - Winner: ${winnerId}`);
+        } catch (error) {
+            console.error('Error updating challenge on game end:', error);
+            // Don't throw - game should still be marked as finished even if challenge update fails
+        }
     }
 }
 

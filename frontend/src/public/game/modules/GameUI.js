@@ -147,10 +147,13 @@ export class GameUI {
                 }
 
                 // Make opponent board cells clickable (isClickable = true for opponent board)
-                if (isClickable && !isHit && !isMiss) {
+                // But not if game is finished
+                const isGameFinished = this.game && this.game.status === GameConstants.GAME_STATUS.FINISHED;
+                
+                if (isClickable && !isHit && !isMiss && !isGameFinished) {
                     cell.addEventListener('click', () => this.handleCellClick(row, col));
                     cell.style.cursor = 'pointer';
-                } else if (isHit || isMiss) {
+                } else if (isHit || isMiss || isGameFinished) {
                     cell.classList.add('disabled');
                     cell.style.cursor = 'not-allowed';
                 }
@@ -212,6 +215,12 @@ export class GameUI {
 
     async handleMultiplayerAttack(row, col) {
         try {
+            // Prevent attacks if game is finished
+            if (this.game && this.game.status === GameConstants.GAME_STATUS.FINISHED) {
+                this.showMessage('El juego ha terminado', 'error');
+                return;
+            }
+            
             this.showMessage('Atacando...', 'info');
             
             const result = await this.gameManager.makeMove(row, col);
@@ -332,6 +341,14 @@ export class GameUI {
             if (this.elements.gameStatus) {
                 this.elements.gameStatus.textContent = youWon ? '¡Victoria!' : 'Derrota';
             }
+            
+            // Add button to return to challenges
+            setTimeout(() => {
+                const returnButton = confirm(message + '\n\n¿Deseas volver a la página de desafíos?');
+                if (returnButton) {
+                    window.location.href = '/challenge';
+                }
+            }, 2000);
         } 
         // Local game mode
         else if (this.game && this.game.winner) {
