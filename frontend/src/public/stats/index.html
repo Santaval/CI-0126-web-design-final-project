@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/global/global.css" />
-    <link rel="stylesheet" href="/stats/styles.css" />
+    <link rel="stylesheet" href="/stats/styles-new.css" />
     <link rel="stylesheet" href="/components/avatar/avatar.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,42 +23,25 @@
       <section id="stats-section">
         <header>
           <div data-include="avatar"></div>
-          <h1>My stats</h1>
+          <h1>Mis Estadísticas</h1>
         </header>
 
         <div id="stats-container">
+          <!-- Stats will be loaded here -->
+          <div class="loading">Cargando estadísticas...</div>
         </div>
       </section>
 
       <section id="previous-matches-section">
-            <h2 class="white-text">Previous Matches</h2>
-          <!-- Match card example -->
-          <div class="match-card">
-            <div class="player player-left winner">
-              <div class="avatar-circle">
-                <img src="/img/default-profile.png" alt="Nachito" />
-              </div>
-              <div class="player-info">
-                <span class="player-name">Nachito</span>
-                <span class="player-label">Winner</span>
-              </div>
-            </div>
-            <div class="vs-label">VS</div>
-            <div class="player player-right">
-              <div class="avatar-circle">
-                <img src="/img/default-profile.png" alt="Steven" />
-              </div>
-              <div class="player-info">
-                <span class="player-name">Steven</span>
-              </div>
-            </div>
-          </div>
-          <!-- End match card example -->
+        <h2 class="white-text">Historial de Partidas</h2>
+        <div id="matches-container">
+          <!-- Matches will be loaded here -->
+          <div class="loading">Cargando historial...</div>
         </div>
       </section>
 
     </main>
-    <script type="module" src="/stats/main.js" defer></script>
+    <script src="/stats/main-new.js" defer></script>
     <script type="module" src="/components/navbar/navbar.js" defer></script>
     <script type="module" src="/components/avatar/avatar.js" defer></script>
   </body>

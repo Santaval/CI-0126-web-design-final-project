@@ -9,6 +9,7 @@ const { passport } = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
 const challengeRoutes = require('./routes/challenge');
+const statsRoutes = require('./routes/stats');
 const connectDB = require('./config/database');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -71,9 +72,8 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/game', gameRoutes);
-
-// Challenge routes
 app.use('/api/challenge', challengeRoutes);
+app.use('/api/stats', statsRoutes);
 
 
 // Servir archivos estaticos si es necesario
