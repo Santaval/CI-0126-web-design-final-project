@@ -304,6 +304,7 @@ function handleGameStateUpdate(state) {
         
         // Update statistics
         if (state.statistics) {
+            console.log('Updating statistics:', state.statistics);
             const shipsSunkEl = document.getElementById('ships-sunk');
             const oppShipsRemainingEl = document.getElementById('opponent-ships-remaining');
             const playerShipsRemainingEl = document.getElementById('player-ships-remaining');
@@ -311,12 +312,23 @@ function handleGameStateUpdate(state) {
             const hitsTakenEl = document.getElementById('player-hits-taken');
             const attemptsEl = document.getElementById('attempts-count');
             
+            console.log('Elements found:', {
+                shipsSunkEl: !!shipsSunkEl,
+                oppShipsRemainingEl: !!oppShipsRemainingEl,
+                playerShipsRemainingEl: !!playerShipsRemainingEl,
+                hitsGivenEl: !!hitsGivenEl,
+                hitsTakenEl: !!hitsTakenEl,
+                attemptsEl: !!attemptsEl
+            });
+            
             if (shipsSunkEl) shipsSunkEl.textContent = `${state.statistics.yourSunkShips.length}/5`;
             if (oppShipsRemainingEl) oppShipsRemainingEl.textContent = state.statistics.opponentShipsRemaining;
             if (playerShipsRemainingEl) playerShipsRemainingEl.textContent = state.statistics.yourShipsRemaining;
             if (hitsGivenEl) hitsGivenEl.textContent = state.statistics.yourHits;
             if (hitsTakenEl) hitsTakenEl.textContent = state.statistics.opponentHits;
             if (attemptsEl) attemptsEl.textContent = state.statistics.yourTotalShots;
+        } else {
+            console.log('No statistics in state:', state);
         }
         
         // Render boards

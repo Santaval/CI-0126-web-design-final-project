@@ -107,7 +107,8 @@ export class GameUI {
         this.renderBoard(this.elements.playerBoard, player.board, false);
         this.renderBoard(this.elements.opponentBoard, player.attackBoard, true);
         
-        this.updateBoardStats(player, opponent);
+        // Don't update board stats in multiplayer mode - stats come from server
+        // this.updateBoardStats(player, opponent);
     }
 
     renderBoard(container, board, isClickable = false) {
