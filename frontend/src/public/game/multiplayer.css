@@ -1,0 +1,316 @@
+/* =============================================
+   MULTIPLAYER LOBBY STYLES
+   ============================================= */
+
+.lobby-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.lobby-container h1 {
+    font-size: 3em;
+    color: #1a73e8;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lobby-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 40px;
+    margin: 40px 0;
+}
+
+.lobby-option {
+    flex: 1;
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.lobby-option h2 {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+
+.lobby-option input {
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    text-align: center;
+    font-family: inherit;
+}
+
+.lobby-option input:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.lobby-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+    min-width: 50px;
+}
+
+.lobby-message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lobby-message.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.lobby-message.info {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+/* =============================================
+   WAITING ROOM STYLES
+   ============================================= */
+
+.waiting-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 60px 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.waiting-container h1 {
+    font-size: 2.5em;
+    color: #1a73e8;
+    margin-bottom: 40px;
+}
+
+.game-code-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    border-radius: 15px;
+    margin: 30px 0;
+    color: white;
+}
+
+.game-code-display p {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.game-code-display h2 {
+    font-size: 3.5em;
+    font-weight: bold;
+    letter-spacing: 10px;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.waiting-info {
+    margin: 30px 0;
+}
+
+.waiting-info p {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* =============================================
+   SETUP SCREEN UPDATES
+   ============================================= */
+
+.setup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 20px;
+}
+
+.opponent-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.opponent-status span:first-child {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.status-badge.ready {
+    background: #4caf50;
+    color: white;
+}
+
+.status-badge.not-ready {
+    background: #ff9800;
+    color: white;
+}
+
+/* =============================================
+   GAME SCREEN UPDATES
+   ============================================= */
+
+.player-identity {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.vs-text {
+    color: #f44336;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.status-indicator {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.status-indicator.your-turn {
+    background: #4caf50;
+    color: white;
+}
+
+.status-indicator.opponent-turn {
+    background: #ff9800;
+    color: white;
+}
+
+/* =============================================
+   BUTTON STYLES
+   ============================================= */
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #d0d0d0;
+}
+
+.btn-danger {
+    background: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #d32f2f;
+}
+
+/* =============================================
+   RESPONSIVE DESIGN
+   ============================================= */
+
+@media (max-width: 768px) {
+    .lobby-options {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .lobby-divider {
+        transform: rotate(90deg);
+        min-height: 50px;
+    }
+    
+    .game-code-display h2 {
+        font-size: 2.5em;
+        letter-spacing: 5px;
+    }
+}

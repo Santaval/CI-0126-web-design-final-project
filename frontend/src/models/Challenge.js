@@ -37,6 +37,10 @@ const challengeSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    gameCode: {
+        type: String,
+        required: true
     }
 }, {
     timestamps: true
