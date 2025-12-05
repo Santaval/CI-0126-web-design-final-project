@@ -1,8 +1,18 @@
-{
-    "id": 1,
-    "username": "example_user",
-    "password": "securepassword123",
-    "email": "example_user@example.com",
-    "imageUrl": "https://example.com/images/example_user.png",
-    "createdAt": "2023-10-01T11:00:00Z"
-}
+[
+    {
+        "id": 1,
+        "username": "example_user",
+        "password": "$2b$10$7oLdu/ufZo9zy.6xl1NcUe.cEkyi2WEoJMSNn23REwggiyoMrr2K.",
+        "email": "example_user@example.com",
+        "imageUrl": "https://example.com/images/example_user.png",
+        "createdAt": "2023-10-01T11:00:00Z"
+    },
+    {
+        "id": 1764894009252,
+        "username": "savaldev",
+        "password": "$2b$10$m3vww.BfmU2JpinlDDz.Re/9Dnj1WYgHM19LIK8lBCoZ2Fbu3BwnK",
+        "email": "10200102",
+        "imageUrl": "/img/default-profile.png",
+        "createdAt": "2025-12-05T00:20:09.252Z"
+    }
+]
