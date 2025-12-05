@@ -3,102 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/global/global.css">
-    <script type="module" src="/components/navbar/navbar.js" defer></script>
-    <title>Game Party</title>
-    <link rel="stylesheet" href= "main.css">
+    <title>Game Party - Battleship</title>
+    
+    <link rel="stylesheet" href="/global/global.css"> 
+    <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="game.css">
     <link rel="stylesheet" href="setup.css">
-    <script src="Game.js"></script>
+    
+    <style>
+        /* Variables y base asumidas (pueden venir de global.css) */
+        :root {
+            --bg-color: #0d1a26; /* Fondo oscuro */
+            --text-color: #ffffff; /* Texto claro */
+            --accent-color: #2196F3; /* Azul primario */
+            --border-color: #3f51b5;
+        }
+
+        /* Estilos adicionales para el modo multiplayer */
+        .room-code-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 53, 102, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .multiplayer-status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-connecting {
+            background: #FFA500;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-waiting {
+            background: #2196F3;
+            animation: pulse 2s infinite;
+        }
+
+        .status-ready {
+            background: #4CAF50;
+        }
+
+        .status-error {
+            background: #F44336;
+        }
+
+        .player-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .player-badge.player-1 {
+            background: #2196F3;
+            color: white;
+        }
+
+        .player-badge.player-2 {
+            background: #FF9800;
+            color: white;
+        }
+
+        .setup-info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .opponent-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .copy-code-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+
+        .copy-code-btn:hover {
+            background: #0b7dda;
+        }
+
+        .copy-code-btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        .turn-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+            display: inline-block;
+        }
+
+        .turn-yours {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        .turn-opponent {
+            background: rgba(244, 67, 54, 0.3);
+            color: #F44336;
+            border: 2px solid #F44336;
+        }
+
+        /* Modal para nombre de jugador */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: var(--bg-color, #0d1a26); /* Usar var o fallback */
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            color: var(--text-color, #ffffff);
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid var(--border-color, #3f51b5);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color, #ffffff);
+            font-size: 1rem;
+        }
+
+        .modal input:focus {
+            outline: none;
+            border-color: var(--accent-color, #2196F3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Mejoras responsive */
+        @media (max-width: 768px) {
+            .room-code-display {
+                position: static;
+                margin: 10px auto;
+                width: fit-content;
+                display: block;
+            }
+
+            .game-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .player-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.error {
+            background: #F44336;
+        }
+
+        .toast.info {
+            background: #2196F3;
+        }
+
+        .toast.warning {
+            background: #FF9800;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
-
-<div>
-
-</div>
-
-<header>
-    <div data-include="navbar"></div>
-</header>
-
 <body>
+    <header>
+        <div data-include="navbar"></div> 
+    </header>
 
-  <div id="lobby-screen" class="screen">
-      <h1>Battleship Multiplayer</h1>
-      <div class="lobby-options">
-          <button id="create-game-btn" class="btn-primary">Crear Partida</button>
-          <button id="join-game-btn" class="btn-secondary">Unirse a Partida</button>
-          <button id="single-player-btn" class="btn-secondary">Modo Solo</button>
-      </div>
-      <div id="game-code-section" style="display: none;">
-          <input type="text" id="game-code-input" placeholder="Código de Partida">
-          <button id="join-with-code-btn" class="btn-primary">Unirse</button>
-      </div>
-  </div>
+    <div id="player-name-modal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <h2>Ingresa tu nombre</h2>
+            <input type="text" id="modal-player-name" placeholder="Tu nombre" maxlength="20">
+            <div class="modal-buttons">
+                <button id="modal-cancel-btn" class="btn-secondary">Cancelar</button>
+                <button id="modal-confirm-btn" class="btn-primary">Continuar</button>
+            </div>
+        </div>
+    </div>
 
-  <div id="setup-screen" class="screen" style="display: none;">
-      <h1>Coloca tus Barcos</h1>
-      <div class="setup-container">
-          <div class="ships-pool" id="ships-pool">
-              <!-- Barcos disponibles para colocar -->
-          </div>
-          <div class="board-container">
-              <div class="setup-board" id="setup-board">
-                  <!-- Tablero para colocar barcos -->
-              </div>
-              <div class="setup-controls">
-                  <button id="toggle-orientation-btn" class="btn-secondary">
-                      Orientación: Horizontal
-                  </button>
-                  <button id="random-place-btn" class="btn-secondary">
-                      Colocar Aleatoriamente
-                  </button>
-                  <button id="clear-ships-btn" class="btn-danger">
-                      Limpiar Todo
-                  </button>
-              </div>
-          </div>
-          <button id="start-game-btn" class="btn-primary" disabled>
-              Iniciar Batalla
-          </button>
-      </div>
-  </div>
+    <div id="lobby-screen" class="screen">
+        <div class="lobby-container">
+            <h1>🚢 Battleship Multiplayer</h1>
+            <p class="subtitle">Batalla naval multijugador en tiempo real</p>
+            <div class="player-name-section">
+                <label for="player-name-input">Tu nombre:</label>
+                <input type="text" id="player-name-input" placeholder="Ingresa tu nombre" value="Jugador">
+            </div>
+            <div class="lobby-options">
+                <button id="create-game-btn" class="btn-primary">
+                    <span class="icon">+</span> Crear Partida
+                </button>
+                <button id="join-game-btn" class="btn-secondary">
+                    <span class="icon">🔗</span> Unirse a Partida
+                </button>
+                <button id="single-player-btn" class="btn-secondary">
+                    <span class="icon">👤</span> Modo Solo vs CPU
+                </button>
+            </div>
+            <div id="join-section" class="join-section" style="display: none;">
+                <h3>Unirse a Partida Existente</h3>
+                <div class="join-form">
+                    <input type="text" id="game-code-input" placeholder="Código de partida (ej: ABC123)" maxlength="6">
+                    <button id="join-with-code-btn" class="btn-primary">Unirse</button>
+                </div>
+                <p class="help-text">Ingresa el código de 6 letras que te compartió tu amigo</p>
+            </div>
+            <div class="game-info">
+                <div class="info-card">
+                    <h3>🎮 Modos de Juego</h3>
+                    <ul>
+                        <li><strong>Multijugador Online:</strong> Juega con amigos en tiempo real</li>
+                        <li><strong>Single Player:</strong> Practica contra la CPU</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>⚓ Reglas del Juego</h3>
+                    <ul>
+                        <li>Coloca tus 5 barcos estratégicamente</li>
+                        <li>Alterna turnos para atacar al oponente</li>
+                        <li>¡Hunde todos los barcos enemigos para ganar!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <div id="game-screen" class="screen" style="display: none;">
-      <div class="game-header">
-          <div class="player-info">
-              <span id="player-name">Jugador 1</span>
-              <span id="player-status">Es tu turno</span>
-          </div>
-          <div class="game-info">
-              <div class="attempts">Intentos: <span id="attempts-count">0</span></div>
-              <div class="ships">Barcos Hundidos: <span id="ships-sunk">0</span>/5</div>
-          </div>
-      </div>
+    <div id="setup-screen" class="screen" style="display: none;">
+        <div class="setup-header">
+            <h1>⚓ Coloca tus Barcos</h1>
+            <div id="room-code-display" class="room-code-display" style="display: none;">
+                <span id="room-code-text">Cargando...</span>
+                <button id="copy-room-code-btn" class="copy-code-btn">📋 Copiar</button>
+            </div>
+        </div>
+        <div id="multiplayer-info" class="setup-info-panel" style="display: none;">
+            <div class="status-display">
+                <span class="status-indicator" id="connection-status-indicator"></span>
+                <span id="connection-status-text">Conectando al servidor...</span>
+            </div>
+            <div id="opponent-info-container" class="opponent-info" style="display: none;">
+                <h4>Información del Oponente:</h4>
+                <p id="opponent-name">Esperando a que se una el oponente...</p>
+                <div id="opponent-ready-status" style="display: none;">
+                    <span class="status-indicator status-ready"></span>
+                    <span>El oponente está listo</span>
+                </div>
+            </div>
+            <div id="player-ready-status" style="display: none;">
+                <span class="status-indicator status-ready"></span>
+                <span>¡Tú estás listo!</span>
+            </div>
+        </div>
+        <div class="setup-container">
+            <div class="setup-left">
+                <div class="ships-pool-container">
+                    <h3>🏴‍☠️ Barcos Disponibles</h3>
+                    <div class="ships-pool" id="ships-pool">
+                        </div>
+                </div>
+                <div class="setup-instructions">
+                    <h4>Instrucciones:</h4>
+                    <ol>
+                        <li>Arrastra los barcos a tu tablero</li>
+                        <li>Cambia la orientación si lo necesitas</li>
+                        <li>Coloca todos los barcos para continuar</li>
+                        <li>¡Planifica estratégicamente!</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="setup-right">
+                <div class="board-container">
+                    <h3>🌊 Tu Tablero</h3>
+                    <div class="setup-board" id="setup-board">
+                        </div>
+                </div>
+                <div class="setup-controls">
+                    <button id="toggle-orientation-btn" class="btn-secondary">
+                        <span class="icon">↻</span> <span id="orientation-text">Horizontal</span>
+                    </button>
+                    <button id="random-place-btn" class="btn-secondary">
+                        <span class="icon">🎲</span> Aleatorio
+                    </button>
+                    <button id="clear-ships-btn" class="btn-danger">
+                        <span class="icon">🗑️</span> Limpiar Todo
+                    </button>
+                </div>
+                <div class="setup-progress">
+                    <div class="progress-bar">
+                        <div id="setup-progress" class="progress-fill"></div>
+                    </div>
+                    <span id="ships-placed-count">0/5 barcos colocados</span>
+                </div>
+                <button id="start-game-btn" class="btn-primary" disabled>
+                    <span class="icon">⚔️</span> <span id="start-game-text">Iniciar Batalla</span>
+                </button>
+                <button id="cancel-setup-btn" class="btn-secondary" style="margin-top: 10px;">
+                    <span class="icon">←</span> Volver al Lobby
+                </button>
+            </div>
+        </div>
+    </div>
 
-      <div class="game-boards">
-          <div class="board-container">
-              <h3>Tu Tablero</h3>
-              <div class="board" id="player-board">
-                  <!-- Tablero del jugador -->
-              </div>
-          </div>
-          <div class="board-container">
-              <h3>Tablero Enemigo</h3>
-              <div class="board" id="opponent-board">
-                  <!-- Tablero del oponente -->
-              </div>
-          </div>
-      </div>
+    <div id="game-screen" class="screen" style="display: none;">
+        <div id="game-room-code" class="room-code-display" style="display: none;">
+            Sala: <span id="game-room-code-text"></span>
+        </div>
+        <div class="game-header">
+            <div class="player-info">
+                <div class="player-identity">
+                    <span id="player-name">Jugador 1</span>
+                    <span id="player-badge" class="player-badge player-1">Jugador 1</span>
+                </div>
+                <div id="turn-indicator" class="turn-indicator turn-yours" style="display: none;">
+                    <span id="player-status">Es tu turno</span>
+                </div>
+            </div>
+            <div class="game-info">
+                <div class="info-box">
+                    <span class="info-label">Turno:</span>
+                    <span id="turn-counter" class="info-value">1</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Intentos:</span>
+                    <span id="attempts-count" class="info-value">0</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Hundidos:</span>
+                    <span id="ships-sunk" class="info-value">0/5</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Estado:</span>
+                    <span id="game-status" class="info-value">En juego</span>
+                </div>
+            </div>
+        </div>
+        <div class="game-boards">
+            <div class="board-container">
+                <h3>🌊 Tu Flota</h3>
+                <div class="board" id="player-board">
+                    </div>
+                <div class="board-stats">
+                    <div class="stat">
+                        <span class="stat-label">Barcos restantes:</span>
+                        <span id="player-ships-remaining" class="stat-value">5</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Impactos recibidos:</span>
+                        <span id="player-hits-taken" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="vs-separator">
+                <div class="vs-circle">VS</div>
+            </div>
+            <div class="board-container">
+                <h3>🎯 Tablero Enemigo</h3>
+                <div class="board" id="opponent-board">
+                    </div>
+                <div class="board-stats">
+                    <div class="stat">
+                        <span class="stat-label">Barcos enemigos:</span>
+                        <span id="opponent-ships-remaining" class="stat-value">5</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Impactos dados:</span>
+                        <span id="player-hits-given" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="game-controls">
+            <div class="message-container">
+                <div class="message" id="game-message"></div>
+                <div id="attack-result" class="attack-result" style="display: none;"></div>
+            </div>
+            <div class="control-buttons">
+                <button id="surrender-btn" class="btn-danger">
+                    <span class="icon">🏳️</span> Rendirse
+                </button>
+                <button id="rematch-btn" class="btn-secondary" style="display: none;">
+                    <span class="icon">🔄</span> Revancha
+                </button>
+                <button id="new-game-btn" class="btn-secondary" style="display: none;">
+                    <span class="icon">🆕</span> Nueva Partida
+                </button>
+                <button id="exit-game-btn" class="btn-secondary">
+                    <span class="icon">🚪</span> Salir
+                </button>
+            </div>
+        </div>
+        <div class="game-history" style="display: none;">
+            <h4>Historial de Movimientos</h4>
+            <div id="move-history" class="history-list">
+                </div>
+        </div>
+    </div>
 
-      <div class="game-controls">
-          <div class="message" id="game-message"></div>
-          <button id="surrender-btn" class="btn-danger">Rendirse</button>
-          <button id="rematch-btn" class="btn-secondary" style="display: none;">
-              Revancha
-          </button>
-      </div>
-  </div>
+    <div id="toast-container"></div>
 
-  <script type="module" src="/js/app.js"></script>
+    <script>
+        // Variables globales (declaradas solo una vez al inicio del script)
+        window.currentGameMode = null;
+        window.gameManager = null;
+        window.gameUI = null;
+        window.setupUI = null;
+
+        /**
+         * Muestra una notificación temporal.
+         * @param {string} message - Mensaje a mostrar.
+         * @param {string} [type='info'] - Tipo de notificación ('success', 'error', 'info', 'warning').
+         * @param {number} [duration=3000] - Duración en milisegundos.
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            // Temporizador para empezar la animación de salida
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                // Eliminar el toast del DOM después de la animación de salida
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        /**
+         * Copia un texto al portapapeles y muestra un toast.
+         * @param {string} text - Texto a copiar.
+         */
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Código copiado al portapapeles', 'success');
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                showToast('Error al copiar el código', 'error');
+            });
+        }
+
+        /**
+         * Muestra la pantalla de la aplicación y oculta las demás.
+         * @param {string} screenName - Nombre del ID de la pantalla (ej: 'lobby').
+         */
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            const screenElement = document.getElementById(`${screenName}-screen`);
+            if (screenElement) {
+                screenElement.style.display = 'block';
+            }
+        }
+
+        /**
+         * Muestra el modal para que el jugador ingrese su nombre.
+         * @param {function(string): void} callback - Función a ejecutar con el nombre ingresado.
+         */
+        function showPlayerNameModal(callback) {
+            const modal = document.getElementById('player-name-modal');
+            const input = document.getElementById('modal-player-name');
+            const playerNameInput = document.getElementById('player-name-input');
+
+            // Usar el valor actual si existe
+            input.value = playerNameInput.value || 'Jugador';
+            modal.style.display = 'flex';
+
+            // Enfocar el input
+            setTimeout(() => input.focus(), 100);
+
+            // Configurar botones del modal
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                const name = input.value.trim();
+                if (name) {
+                    playerNameInput.value = name;
+                    modal.style.display = 'none';
+                    if (callback) callback(name);
+                } else {
+                    showToast('Por favor ingresa un nombre', 'error');
+                }
+            };
+
+            document.getElementById('modal-cancel-btn').onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            // Cerrar con Escape / Confirmar con Enter
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('modal-confirm-btn').click();
+                } else if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+        
+        // Exportar para acceso global
+        window.showScreen = showScreen;
+        window.showToast = showToast;
+        window.copyToClipboard = copyToClipboard;
+    </script>
+
+    <script src="Game.js"></script>
+
+    <script>
+        // Las funciones y variables de inicialización están envueltas en un bloque DOMContentLoaded
+        
+        const GameConstants = {
+            GAME_MODES: {
+                SINGLE: 'single',
+                MULTI: 'multi'
+            }
+            // Asumiendo que Game.js define GameConstants
+        };
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Battleship App cargada');
+            
+            // Asumimos que GameManager, GameUI, y SetupUI están definidos en Game.js
+            // Inicializar GameManager
+            if (typeof GameManager !== 'undefined') {
+                window.gameManager = new GameManager();
+            }
+            if (typeof GameUI !== 'undefined') {
+                window.gameUI = new GameUI(window.gameManager);
+            }
+            if (typeof SetupUI !== 'undefined') {
+                window.setupUI = new SetupUI(window.gameManager);
+            }
+
+            // Configurar event listeners
+            setupEventListeners();
+
+            // Mostrar pantalla de lobby
+            showScreen('lobby');
+
+            // Configurar botón de copiar código
+            document.getElementById('copy-room-code-btn')?.addEventListener('click', () => {
+                const roomCode = document.getElementById('room-code-text').textContent;
+                if (roomCode && roomCode !== 'Cargando...') {
+                    copyToClipboard(roomCode);
+                }
+            });
+
+            // Test toast
+            setTimeout(() => {
+                showToast('¡Bienvenido a Battleship!', 'info', 2000);
+            }, 1000);
+        });
+
+
+        function setupEventListeners() {
+            const playerNameInput = document.getElementById('player-name-input');
+
+            // --- Botones de Lobby ---
+            document.getElementById('create-game-btn')?.addEventListener('click', async () => {
+                const playerName = playerNameInput.value.trim() || 'Jugador';
+                if (!playerName) {
+                    showPlayerNameModal((name) => {
+                        startMultiplayerGame('create', name);
+                    });
+                } else {
+                    startMultiplayerGame('create', playerName);
+                }
+            });
+
+            document.getElementById('join-game-btn')?.addEventListener('click', () => {
+                const joinSection = document.getElementById('join-section');
+                joinSection.style.display = joinSection.style.display === 'none' ? 'block' : 'none';
+            });
+
+            document.getElementById('join-with-code-btn')?.addEventListener('click', async function() {
+                const playerName = playerNameInput.value.trim() || 'Jugador';
+                const gameCode = document.getElementById('game-code-input')?.value.trim().toUpperCase();
+
+                if (!gameCode || gameCode.length !== 6) {
+                    showToast('El código debe tener 6 caracteres', 'error');
+                    return;
+                }
+
+                showToast('Procesando solicitud de unión...', 'info');
+                try {
+                    // La función joinMultiplayerGame debe existir en GameManager
+                    const result = await window.gameManager.joinMultiplayerGame(gameCode, playerName);
+                    
+                    if (result.success) {
+                        showToast(`¡Unido a la sala ${gameCode}!`, 'success');
+                        window.currentGameMode = 'multi';
+                        document.getElementById('game-code-input').value = '';
+                        updateConnectionStatus('connecting', 'Conectando a la partida...');
+                        if (window.setupUI) {
+                            window.setupUI.showSetupScreen('multi');
+                        }
+                    } else {
+                        throw new Error(result.error || 'Error desconocido al unirse');
+                    }
+                } catch (error) {
+                    let errorMessage = error.message.includes('Failed to fetch') ? 
+                        'No se puede conectar al servidor.' : error.message;
+                    showToast(`Error al unirse: ${errorMessage}`, 'error');
+                }
+            });
+
+            document.getElementById('single-player-btn')?.addEventListener('click', () => {
+                const playerName = playerNameInput.value.trim() || 'Jugador';
+                if (!playerName) {
+                    showPlayerNameModal((name) => {
+                        startSinglePlayerGame(name);
+                    });
+                } else {
+                    startSinglePlayerGame(playerName);
+                }
+            });
+
+            // --- Botones de Setup y Juego ---
+            document.getElementById('cancel-setup-btn')?.addEventListener('click', () => {
+                if (window.gameManager && window.gameManager.gameMode === GameConstants.GAME_MODES.MULTI) {
+                    if (confirm('¿Estás seguro de que quieres salir? Esto cancelará la partida multijugador.')) {
+                        window.gameManager.restartGame(); // Asumimos que esto limpia la conexión
+                        showScreen('lobby');
+                        showToast('Partida cancelada', 'warning');
+                    }
+                } else {
+                    window.gameManager.restartGame();
+                    showScreen('lobby');
+                }
+            });
+
+            document.getElementById('exit-game-btn')?.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que quieres salir del juego?')) {
+                    window.gameManager.restartGame();
+                    showScreen('lobby');
+                    showToast('Has salido del juego', 'info');
+                }
+            });
+
+            document.getElementById('new-game-btn')?.addEventListener('click', () => {
+                window.gameManager.restartGame();
+                showScreen('lobby');
+            });
+            
+            // Atajos de teclado para inputs
+            document.getElementById('game-code-input')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('join-with-code-btn').click();
+                }
+            });
+            document.getElementById('modal-player-name')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('modal-confirm-btn').click();
+                }
+            });
+        }
+
+
+        async function startMultiplayerGame(mode, playerName) {
+            try {
+                showToast('Creando partida multijugador...', 'info');
+                let result;
+                
+                if (mode === 'create') {
+                    result = await window.gameManager.createMultiplayerGame(playerName);
+                    
+                    if (result.success) {
+                        showToast(`¡Sala creada! Código: ${result.gameCode}`, 'success', 5000);
+                        window.currentGameMode = 'multi';
+                        
+                        // Actualizar UI con código de sala
+                        document.getElementById('room-code-text').textContent = result.gameCode;
+                        document.getElementById('multiplayer-info').style.display = 'block';
+                        document.getElementById('room-code-display').style.display = 'block';
+                        
+                        updateConnectionStatus('waiting', 'Esperando a que se una el oponente...');
+                        
+                        if (window.setupUI) {
+                            window.setupUI.showSetupScreen('multi');
+                        }
+                    } else {
+                        throw new Error(result.error);
+                    }
+                }
+            } catch (error) {
+                let errorMessage = error.message.includes('Failed to fetch') ? 
+                    'Error de conexión con el servidor.' : error.message;
+                console.error('Error al crear partida multijugador:', error);
+                showToast(`Error: ${errorMessage}`, 'error');
+            }
+        }
+
+
+        function startSinglePlayerGame(playerName) {
+            try {
+                showToast('Iniciando modo single player...', 'info');
+                window.currentGameMode = 'single';
+                window.gameManager.startSinglePlayer(playerName);
+                if (window.setupUI) {
+                    window.setupUI.showSetupScreen('single');
+                }
+            } catch (error) {
+                console.error('Error al iniciar single player:', error);
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Actualiza el indicador visual de conexión.
+         * @param {string} status - 'connecting', 'waiting', 'ready', 'error'.
+         * @param {string} message - Texto de estado.
+         */
+        function updateConnectionStatus(status, message) {
+            const indicator = document.getElementById('connection-status-indicator');
+            const text = document.getElementById('connection-status-text');
+            
+            if (indicator) {
+                indicator.className = 'status-indicator';
+                switch(status) {
+                    case 'connecting': indicator.classList.add('status-connecting'); break;
+                    case 'waiting': indicator.classList.add('status-waiting'); break;
+                    case 'ready': indicator.classList.add('status-ready'); break;
+                    case 'error': indicator.classList.add('status-error'); break;
+                }
+            }
+            if (text) {
+                text.textContent = message;
+            }
+        }
+
+        // Hacer funciones de manejo de estado global (si son llamadas desde Game.js)
+        window.updateConnectionStatus = updateConnectionStatus;
+        // window.joinMultiplayerGame = joinMultiplayerGame; // No es necesario si se llama solo desde el event listener
+    </script>
+    
 </body>
-
+</html>

@@ -102,3 +102,91 @@
     align-items: center;
     margin-top: 30px;
 }
+
+/* game.css - añade al final */
+.connect-options {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.game-code-display {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: rgba(0, 53, 102, 0.3);
+    border-radius: 8px;
+}
+
+.code-display {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    letter-spacing: 3px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+.help-text {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+#waiting-for-opponent {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
