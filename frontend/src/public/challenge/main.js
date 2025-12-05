@@ -189,7 +189,7 @@ function updateChallengeStatus(player) {
     }
 }
 
-function updateChallengeActions(player) {
+async function updateChallengeActions(player) {
     challengeActions.innerHTML = "";
 
     switch (player.challengeStatus) {
@@ -231,7 +231,9 @@ function updateChallengeActions(player) {
             break;
 
         case "in_progress":
-            const goBtn = createButton("Ir a Partida", "primary-button", () => goToMatch(player.challengeId));
+            const challenge = await loadChallenge(player.challengeId);
+            console.log(challenge);
+            const goBtn = createButton("Ir a Partida", "primary-button", () => goToMatch(challenge.gameCode));
             challengeActions.appendChild(goBtn);
 
             if (player.isChallenger) {
@@ -258,6 +260,24 @@ function createButton(text, className, onClick) {
     button.classList.add(className);
     button.onclick = onClick;
     return button;
+}
+
+
+async function loadChallenge(challengeId) {
+    try {
+        const response = await fetch(`/api/challenge/${challengeId}`, {
+            credentials: 'include'
+        });
+
+        const res = await response.json();
+        if (res.success) {
+            return res.challenge;
+        } else {
+            console.error('Failed to load challenge:', res.message);
+        }
+    } catch (error) {
+        console.error('Error loading challenge:', error);
+    }
 }
 
 async function sendChallenge(username) {
